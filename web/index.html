@@ -19,33 +19,51 @@
   <div class="main-container">
     <!-- Sidebar -->
     <aside class="sidebar">
-      <h2 class="sidebar__title">SHAPE</h2>
-      <div class="shape-options">
-        <button class="btn-shape btn-shape--active" data-shape="rectangle">
-          <div class="shape-icon shape-icon--rect"></div>
-          Rectangle
-        </button>
-        <button class="btn-shape" data-shape="circle">
-          <div class="shape-icon shape-icon--circle"></div>
-          Circle
-        </button>
+      <div class="sidebar-tabs">
+        <button class="tab-btn active" data-tab="shape">SHAPE</button>
+        <button class="tab-btn" data-tab="weapon">WEAPON</button>
       </div>
 
-      <h2 class="sidebar__title">WEAPON</h2>
-      <div class="shape-options">
-        <button class="btn-weapon btn-weapon--active" data-weapon="sword">
-          <div class="shape-icon shape-icon--sword">⚔️</div>
-          Sword
-        </button>
-        <div class="weapon-settings">
-          <label class="setting-row">
-            <span>Spawn (s)</span>
-            <input type="number" id="setting-spawn" class="setting-input" value="10" min="1" step="1">
-          </label>
-          <label class="setting-row">
-            <span>Duration (s)</span>
-            <input type="number" id="setting-duration" class="setting-input" value="5" min="1" step="1">
-          </label>
+      <!-- SHAPE TAB -->
+      <div id="tab-shape" class="tab-content active">
+        <div class="shape-options">
+          <button class="btn-shape btn-shape--active" data-shape="rectangle">
+            <div class="shape-icon shape-icon--rect"></div>
+            Rectangle
+          </button>
+          <button class="btn-shape" data-shape="circle">
+            <div class="shape-icon shape-icon--circle"></div>
+            Circle
+          </button>
+        </div>
+      </div>
+
+      <!-- WEAPON TAB -->
+      <div id="tab-weapon" class="tab-content">
+        <div class="shape-options">
+          <div class="weapon-item">
+            <div class="weapon-list" style="display: flex; flex-direction: column; gap: 8px; flex: 1;">
+              <button class="btn-weapon btn-weapon--active" data-weapon="sword">
+                <div class="shape-icon shape-icon--sword">⚔️</div>
+                Sword
+              </button>
+              <button class="btn-weapon" data-weapon="longsword">
+                <div class="shape-icon shape-icon--sword">🗡️</div>
+                Long Sword
+              </button>
+            </div>
+            <button class="btn-settings-toggle" id="sword-settings-btn" title="Weapon Settings">⚙️</button>
+          </div>
+          <div class="weapon-settings" id="sword-settings" style="display: none;">
+            <label class="setting-row">
+              <span>Spawn (s)</span>
+              <input type="number" id="setting-spawn" class="setting-input" value="10" min="1" step="1">
+            </label>
+            <label class="setting-row">
+              <span>Duration (s)</span>
+              <input type="number" id="setting-duration" class="setting-input" value="5" min="1" step="1">
+            </label>
+          </div>
         </div>
       </div>
     </aside>

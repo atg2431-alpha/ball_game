@@ -19,8 +19,10 @@ export function spawnWeapon(timestamp) {
     const x = padding + Math.random() * (state.boardWidth - padding * 2);
     const y = padding + Math.random() * (state.boardHeight - padding * 2);
 
+    const type = state.selectedWeapon;
     const el = document.createElement('div');
-    el.className = `item-sword`;
+    el.className = type === 'longsword' ? 'item-longsword' : 'item-sword';
+    el.textContent = type === 'longsword' ? '🗡️' : '⚔️';
     el.style.left = `${x}px`;
     el.style.top = `${y}px`;
     container.appendChild(el);
@@ -29,7 +31,8 @@ export function spawnWeapon(timestamp) {
       id: `weapon-${weaponIdCounter++}`,
       x,
       y,
-      radius: 8, // Half of 16px
+      radius: 12, // Hitbox for pickup
+      type,
       el,
     });
   }
@@ -59,9 +62,11 @@ export function updateWeapons(timestamp) {
           
           // Create orbiting element
           const orbitEl = document.createElement('div');
-          orbitEl.className = 'orbit-sword';
+          orbitEl.className = item.type === 'longsword' ? 'orbit-longsword' : 'orbit-sword';
+          orbitEl.textContent = item.type === 'longsword' ? '🗡️' : '⚔️';
           document.getElementById('weapon-container').appendChild(orbitEl);
           ball.orbitEl = orbitEl;
+          ball.weaponType = item.type;
         }
         
         // Remove item from board
@@ -86,18 +91,55 @@ export function updateWeapons(timestamp) {
 
       // Render orbit
       if (ball.orbitEl) {
-        ball.orbitEl.style.left = `${swordX}px`;
-        ball.orbitEl.style.top = `${swordY}px`;
+        if (ball.weaponType === 'longsword') {
+          // Long sword sticks out radially from the edge
+          // The emoji 🗡️ naturally points down-left. We want it to point outward (angle).
+          // We add Math.PI / 4 (45 degrees) to make it point up-right relative to container,
+          // but CSS rotation starts from top. Let's just use CSS transform and rotate(angle).
+          const edgeX = ball.x + Math.cos(angle) * ball.radius;
+          const edgeY = ball.y + Math.sin(angle) * ball.radius;
+          ball.orbitEl.style.left = `${edgeX}px`;
+          ball.orbitEl.style.top = `${edgeY}px`;
+          // Rotate it so it points outward. +90 deg or +45 deg depends on emoji orientation.
+          // 🗡️ points top-right, or bottom-left depending on OS. Usually it's diagonal.
+          // A standard CSS rotate(${angle}rad) will work if we adjust the baseline in CSS.
+          // Added Math.PI (180deg) to flip the sword outward.
+          ball.orbitEl.style.transform = `translate(0%, -50%) rotate(${angle + Math.PI/4 + Math.PI}rad)`;
+        } else {
+          ball.orbitEl.style.left = `${swordX}px`;
+          ball.orbitEl.style.top = `${swordY}px`;
+        }
       }
 
-      // Check combat collision with enemy
-      if (enemy) {
-        const dx = enemy.x - swordX;
-        const dy = enemy.y - swordY;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        const swordRadius = 6; // Half of 12px
+        if (enemy) {
+          let hit = false;
+          if (ball.weaponType === 'longsword') {
+            // Line segment collision (blade sticks out 40px)
+            const S1x = ball.x + Math.cos(angle) * ball.radius;
+            const S1y = ball.y + Math.sin(angle) * ball.radius;
+            const length = 40;
+            const S2x = ball.x + Math.cos(angle) * (ball.radius + length);
+            const S2y = ball.y + Math.sin(angle) * (ball.radius + length);
+            
+            const L2 = length * length;
+            let t = 0;
+            if (L2 > 0) {
+              t = Math.max(0, Math.min(1, ((enemy.x - S1x) * (S2x - S1x) + (enemy.y - S1y) * (S2y - S1y)) / L2));
+            }
+            const ProjX = S1x + t * (S2x - S1x);
+            const ProjY = S1y + t * (S2y - S1y);
+            const dist = Math.sqrt((enemy.x - ProjX) ** 2 + (enemy.y - ProjY) ** 2);
+            
+            if (dist < enemy.radius + 6) hit = true; // 6 is half-width of blade
+          } else {
+            // Normal point collision
+            const dx = enemy.x - swordX;
+            const dy = enemy.y - swordY;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist < enemy.radius + 10) hit = true; // 10 is sword impact radius
+          }
 
-        if (dist < enemy.radius + swordRadius) {
+          if (hit) {
           // Hit! Check invincibility
           if (!enemy.lastHitTime || timestamp - enemy.lastHitTime > CONFIG.weapons.invincibility) {
             enemy.hp = Math.max(0, enemy.hp - CONFIG.weapons.damage);

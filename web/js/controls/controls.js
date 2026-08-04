@@ -123,9 +123,39 @@ export function initControls(elements) {
 }
 
 /**
- * Bind the sidebar shape selection buttons.
+ * Sidebar options (shape, weapons, tabs)
  */
 export function initSidebar(elements) {
+  // Sidebar Tabs Logic
+  const tabBtns = document.querySelectorAll('.tab-btn');
+  const tabContents = document.querySelectorAll('.tab-content');
+
+  tabBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      // Remove active from all
+      tabBtns.forEach(b => b.classList.remove('active'));
+      tabContents.forEach(c => c.classList.remove('active'));
+      
+      // Add active to clicked
+      btn.classList.add('active');
+      const targetId = `tab-${btn.dataset.tab}`;
+      const targetContent = document.getElementById(targetId);
+      if (targetContent) targetContent.classList.add('active');
+    });
+  });
+
+  // Settings Dropdown Toggle
+  const swordSettingsBtn = document.getElementById('sword-settings-btn');
+  const swordSettings = document.getElementById('sword-settings');
+
+  if (swordSettingsBtn && swordSettings) {
+    swordSettingsBtn.addEventListener('click', () => {
+      const isHidden = swordSettings.style.display === 'none';
+      swordSettings.style.display = isHidden ? 'flex' : 'none';
+      swordSettingsBtn.classList.toggle('active', isHidden);
+    });
+  }
+
   elements.shapeBtns.forEach(btn => {
     btn.addEventListener('click', (e) => {
       // Stop the game if running

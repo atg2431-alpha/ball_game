@@ -591,7 +591,56 @@ body::before {
   gap: 12px;
 }
 
-.btn-shape {
+.sidebar-tabs {
+  display: flex;
+  gap: 8px;
+  border-bottom: 1px solid var(--border-subtle);
+  padding-bottom: 12px;
+  margin-bottom: 8px;
+}
+
+.tab-btn {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  font-family: var(--font-family);
+  font-size: 0.85rem;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: var(--border-radius-sm);
+  transition: all 0.2s ease;
+}
+
+.tab-btn:hover {
+  background: var(--btn-hover);
+  color: var(--text-primary);
+}
+
+.tab-btn.active {
+  background: var(--btn-bg);
+  color: var(--text-primary);
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+.tab-content {
+  display: none;
+  animation: fadeIn 0.3s ease;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.btn-shape, .btn-weapon {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -643,27 +692,71 @@ body::before {
 /* ============================================
    WEAPONS & ITEMS
    ============================================ */
-.item-sword {
+.weapon-item {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-weapon {
+  flex: 1;
+}
+
+.btn-settings-toggle {
+  width: 44px;
+  background: var(--btn-bg);
+  border: 1px solid transparent;
+  border-radius: var(--border-radius-sm);
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.btn-settings-toggle:hover {
+  background: var(--btn-hover);
+  color: var(--text-primary);
+}
+
+.btn-settings-toggle.active {
+  background: rgba(168, 85, 247, 0.15);
+  border-color: rgba(168, 85, 247, 0.5);
+  color: #c084fc;
+}
+
+.item-sword, .item-longsword {
   position: absolute;
-  width: 16px;
-  height: 16px;
-  background: #fbbf24; /* yellow */
-  border-radius: 50%;
   transform: translate(-50%, -50%);
-  box-shadow: 0 0 10px #fbbf24;
   z-index: 2;
+  font-size: 24px;
+  filter: drop-shadow(0 0 8px rgba(251, 191, 36, 0.6));
+  cursor: default;
+  user-select: none;
+}
+
+.item-longsword {
+  font-size: 30px;
 }
 
 .orbit-sword {
   position: absolute;
-  width: 12px;
-  height: 12px;
-  background: #fbbf24;
-  border-radius: 50%;
   transform: translate(-50%, -50%);
-  box-shadow: 0 0 15px #f59e0b;
   z-index: 3;
   pointer-events: none;
+  font-size: 20px;
+  filter: drop-shadow(0 0 10px rgba(251, 191, 36, 0.8));
+  user-select: none;
+}
+
+.orbit-longsword {
+  position: absolute;
+  z-index: 3;
+  pointer-events: none;
+  font-size: 32px;
+  filter: drop-shadow(0 0 12px rgba(251, 191, 36, 0.9));
+  user-select: none;
+  transform-origin: 0% 50%; /* Pivot around left edge */
 }
 
 .weapon-settings {
