@@ -25,6 +25,24 @@
           Circle
         </button>
       </div>
+
+      <h2 class="sidebar__title">WEAPON</h2>
+      <div class="shape-options">
+        <button class="btn-weapon btn-weapon--active" data-weapon="sword">
+          <div class="shape-icon shape-icon--sword">⚔️</div>
+          Sword
+        </button>
+        <div class="weapon-settings">
+          <label class="setting-row">
+            <span>Spawn (s)</span>
+            <input type="number" id="setting-spawn" class="setting-input" value="10" min="1" step="1">
+          </label>
+          <label class="setting-row">
+            <span>Duration (s)</span>
+            <input type="number" id="setting-duration" class="setting-input" value="5" min="1" step="1">
+          </label>
+        </div>
+      </div>
     </aside>
 
     <div class="game-wrapper">
@@ -47,6 +65,8 @@
     <div class="board" id="game-board">
       <!-- Board background image can be set via CSS or JS later -->
       <div class="board__inner">
+        <!-- Container for spawned items/weapons -->
+        <div id="weapon-container"></div>
 
         <!-- Ball 1 (Blue) -->
         <div class="ball ball--blue" id="ball-1" style="left: 25%; top: 55%;">
@@ -73,18 +93,26 @@
     <div class="stats-bar">
       <div class="stats-card stats-card--blue">
         <span class="stats-card__label">HP</span>
-        <span class="stats-card__value" id="ball-1-hp">100</span>
+        <input type="number" class="stats-card__input stats-card__value--blue" id="ball-1-hp" value="100" min="0" step="1">
       </div>
       <div class="stats-card stats-card--red">
         <span class="stats-card__label">HP</span>
-        <span class="stats-card__value" id="ball-2-hp">100</span>
+        <input type="number" class="stats-card__input stats-card__value--red" id="ball-2-hp" value="100" min="0" step="1">
       </div>
     </div>
     <!-- Error Display -->
     <div id="error-log" style="color: red; background: #222; padding: 10px; width: 100%; font-family: monospace; z-index: 100; position: absolute; top: 0; left: 0; display: none;"></div>
   </div>
+
+  <!-- Game Over Screen -->
+  <div class="game-over-overlay" id="game-over-screen">
+    <div class="game-over-card">
+      <h2 class="game-over-title">GAME OVER</h2>
+      <p class="game-over-winner" id="winner-text">Player Wins!</p>
+      <button class="btn-primary" id="play-again-btn">Play Again</button>
     </div>
   </div>
+  
   <script>
     window.addEventListener('error', function(e) {
       const log = document.getElementById('error-log');

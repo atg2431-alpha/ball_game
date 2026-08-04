@@ -20,6 +20,8 @@ export function createBall(config, el, hpDisplay, velocity) {
   const radius = ballRect.width / 2;
 
   return {
+    id: config.id,
+    name: config.name,
     el,
     hpDisplay,
     radius,

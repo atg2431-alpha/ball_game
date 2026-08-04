@@ -8,7 +8,7 @@
 import { CONFIG } from './config.js';
 import { applyBallImage } from './components/ball.js';
 import { applyBoardImage } from './components/board.js';
-import { initControls, initSidebar } from './controls/controls.js';
+import { initControls, initSidebar, initSettings } from './controls/controls.js';
 import { initDrag } from './input/drag.js';
 
 /**
@@ -25,6 +25,9 @@ function init() {
     ball2HpDisplay: document.getElementById('ball-2-hp'),
     startBtn: document.getElementById('start-btn'),
     shapeBtns: document.querySelectorAll('.btn-shape'),
+    weaponBtns: document.querySelectorAll('.btn-weapon'),
+    settingSpawn: document.getElementById('setting-spawn'),
+    settingDuration: document.getElementById('setting-duration'),
   };
 
   // Apply custom images if configured
@@ -35,6 +38,7 @@ function init() {
   // Wire up start/stop controls and sidebar
   initControls(elements);
   initSidebar(elements);
+  initSettings(elements);
 
   // Initialize drag-to-aim input
   initDrag(elements);

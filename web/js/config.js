@@ -34,9 +34,18 @@ export const CONFIG = {
   },
 
   aim: {
-    minSpeed: 2,        // minimum launch speed (px/frame)
-    maxSpeed: 8,        // maximum launch speed (px/frame)
-    maxLineLength: 100, // max aim arrow length in pixels
-    sensitivity: 0.05,  // drag distance → speed multiplier
+    minSpeed: 2,
+    maxSpeed: 8,
+    maxLineLength: 100,
+    sensitivity: 0.05,
+  },
+
+  weapons: {
+    spawnInterval: 10000, // ms between spawns
+    duration: 5000,       // ms for buff duration
+    orbitRadius: 40,      // distance from center of large ball
+    orbitSpeed: 0.005,    // radians per ms
+    damage: 10,           // HP deducted on hit
+    invincibility: 500,   // ms cooldown after getting hit
   },
 };

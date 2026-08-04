@@ -13,6 +13,7 @@ import { createBall, renderBall } from '../components/ball.js';
 import { getBoardDimensions } from '../components/board.js';
 import { gameLoop } from '../engine/game-loop.js';
 import { hideAimLines, clearAims, setDraggable } from '../input/drag.js';
+import { resetWeapons } from '../physics/weapons.js';
 
 // ─── Velocity Helpers ───────────────────────────────────────
 
@@ -71,7 +72,7 @@ function startGame(elements) {
   startBtn.classList.add('btn--active');
   startBtn.title = 'Stop Simulation';
 
-  gameLoop();
+  state.animationId = requestAnimationFrame(gameLoop);
 }
 
 /**
@@ -95,6 +96,9 @@ function stopGame(elements) {
   // Clear aims and re-enable dragging
   clearAims();
   setDraggable(ball1El, ball2El, true);
+
+  // Clear any active weapons
+  resetWeapons();
 
   state.balls = [];
   startBtn.textContent = '▶';
@@ -151,4 +155,112 @@ export function initSidebar(elements) {
       state.boardHeight = dims.height;
     });
   });
+
+  if (elements.weaponBtns) {
+    elements.weaponBtns.forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        elements.weaponBtns.forEach(b => b.classList.remove('btn-weapon--active'));
+        const targetBtn = e.currentTarget;
+        targetBtn.classList.add('btn-weapon--active');
+        state.selectedWeapon = targetBtn.dataset.weapon;
+      });
+    });
+  }
+}
+
+/**
+ * Handle game over state, showing the victory overlay.
+ */
+export function handleGameOver(winner, elements) {
+  state.running = false;
+  if (state.animationId) {
+    cancelAnimationFrame(state.animationId);
+    state.animationId = null;
+  }
+
+  // Find elements globally since we might not have passed them directly
+  // or we can just fetch them from the DOM
+  const overlay = document.getElementById('game-over-screen');
+  const text = document.getElementById('winner-text');
+  const playAgain = document.getElementById('play-again-btn');
+
+  text.textContent = `${winner.name || 'Player'} Wins!`;
+  overlay.classList.add('is-visible');
+
+  // Play again handler
+  const resetHandler = () => {
+    overlay.classList.remove('is-visible');
+    playAgain.removeEventListener('click', resetHandler);
+    
+    // We need the original elements to pass to stopGame. 
+    // It's cleaner to dispatch a custom event or just reload the page.
+    // For now, we'll manually reset using global query:
+    const mainEls = {
+      ball1El: document.getElementById('ball-1'),
+      ball2El: document.getElementById('ball-2'),
+      startBtn: document.getElementById('start-btn'),
+      boardInner: document.querySelector('.board__inner'),
+      ball1HpDisplay: document.getElementById('ball-1-hp'),
+      ball2HpDisplay: document.getElementById('ball-2-hp'),
+    };
+    
+    // Reset HP displays
+    mainEls.ball1HpDisplay.value = CONFIG.ball1.hp;
+    mainEls.ball2HpDisplay.value = CONFIG.ball2.hp;
+
+    stopGame(mainEls);
+  };
+
+  playAgain.addEventListener('click', resetHandler);
+}
+
+/**
+ * Bind customizable settings inputs
+ */
+export function initSettings(elements) {
+  // Weapon parameters
+  if (elements.settingSpawn) {
+    elements.settingSpawn.addEventListener('change', (e) => {
+      let val = parseInt(e.target.value, 10);
+      if (isNaN(val) || val < 1) val = 1;
+      e.target.value = val;
+      CONFIG.weapons.spawnInterval = val * 1000;
+    });
+  }
+
+  if (elements.settingDuration) {
+    elements.settingDuration.addEventListener('change', (e) => {
+      let val = parseInt(e.target.value, 10);
+      if (isNaN(val) || val < 1) val = 1;
+      e.target.value = val;
+      CONFIG.weapons.duration = val * 1000;
+    });
+  }
+
+  // HP parameters
+  const updateHP = (inputEl, playerConfig, playerIndex) => {
+    let val = parseInt(inputEl.value, 10);
+    if (isNaN(val) || val < 0) val = 0;
+    inputEl.value = val;
+    playerConfig.hp = val;
+    
+    // If game is running, update live HP
+    if (state.running && state.balls[playerIndex]) {
+      state.balls[playerIndex].hp = val;
+      
+      // If live HP goes to 0 due to manual edit, the loop will catch it and game over
+    }
+  };
+
+  if (elements.ball1HpDisplay) {
+    elements.ball1HpDisplay.addEventListener('change', (e) => {
+      updateHP(e.target, CONFIG.ball1, 0);
+    });
+  }
+
+  if (elements.ball2HpDisplay) {
+    elements.ball2HpDisplay.addEventListener('change', (e) => {
+      updateHP(e.target, CONFIG.ball2, 1);
+    });
+  }
 }

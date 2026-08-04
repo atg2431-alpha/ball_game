@@ -16,4 +16,9 @@ export const state = {
   // Aim state (set by drag input, read by controls)
   aims: {},       // { 'ball-1': { dx, dy, speed }, ... }
   dragging: null,  // { ballId, ballEl, centerX, centerY } while dragging
+
+  // Weapons and Combat
+  selectedWeapon: 'sword',
+  spawnedItems: [], // { id, x, y, el }
+  lastSpawnTime: 0,
 };
