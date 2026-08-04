@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Ball Battle Simulator - An arena-style ball fighting game">
+  <title>Ball Battle Simulator</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="main-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <h2 class="sidebar__title">SHAPE</h2>
+      <div class="shape-options">
+        <button class="btn-shape btn-shape--active" data-shape="rectangle">
+          <div class="shape-icon shape-icon--rect"></div>
+          Rectangle
+        </button>
+        <button class="btn-shape" data-shape="circle">
+          <div class="shape-icon shape-icon--circle"></div>
+          Circle
+        </button>
+      </div>
+    </aside>
+
+    <div class="game-wrapper">
+    <h1 class="game-title">Ball Battle Simulator</h1>
+
+    <!-- Player Labels -->
+    <div class="player-labels">
+      <div class="player-label player-label--blue">
+        <span class="player-label__name">Player 1</span>
+      </div>
+      <div class="versus-badge">VS</div>
+      <div class="player-label player-label--red">
+        <span class="player-label__name">Player 2</span>
+      </div>
+    </div>
+
+    <!-- Board + Controls -->
+    <div class="board-container">
+      <!-- Game Board / Arena -->
+    <div class="board" id="game-board">
+      <!-- Board background image can be set via CSS or JS later -->
+      <div class="board__inner">
+
+        <!-- Ball 1 (Blue) -->
+        <div class="ball ball--blue" id="ball-1" style="left: 25%; top: 55%;">
+          <!-- Image can be placed inside this div later -->
+          <span class="ball__hp">100</span>
+        </div>
+
+        <!-- Ball 2 (Red) -->
+        <div class="ball ball--red" id="ball-2" style="left: 65%; top: 35%;">
+          <!-- Image can be placed inside this div later -->
+          <span class="ball__hp">100</span>
+        </div>
+
+      </div>
+    </div>
+
+      <!-- Controls -->
+      <div class="controls">
+        <button class="btn-start" id="start-btn" title="Start Simulation">▶</button>
+      </div>
+    </div>
+
+    <!-- Stats Bar -->
+    <div class="stats-bar">
+      <div class="stats-card stats-card--blue">
+        <span class="stats-card__label">HP</span>
+        <span class="stats-card__value" id="ball-1-hp">100</span>
+      </div>
+      <div class="stats-card stats-card--red">
+        <span class="stats-card__label">HP</span>
+        <span class="stats-card__value" id="ball-2-hp">100</span>
+      </div>
+    </div>
+    <!-- Error Display -->
+    <div id="error-log" style="color: red; background: #222; padding: 10px; width: 100%; font-family: monospace; z-index: 100; position: absolute; top: 0; left: 0; display: none;"></div>
+  </div>
+    </div>
+  </div>
+  <script>
+    window.addEventListener('error', function(e) {
+      const log = document.getElementById('error-log');
+      log.style.display = 'block';
+      log.innerHTML += e.message + '<br>' + e.filename + ':' + e.lineno + '<br>';
+    });
+    window.addEventListener('unhandledrejection', function(e) {
+      const log = document.getElementById('error-log');
+      log.style.display = 'block';
+      log.innerHTML += 'Promise rejection: ' + e.reason + '<br>';
+    });
+  </script>
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

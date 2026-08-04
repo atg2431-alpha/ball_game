@@ -1,0 +1,8 @@
+{
+  "name": "ball-battle-simulator",
+  "version": "0.1.0",
+  "description": "Instagram-style ball battle simulation game",
+  "scripts": {
+    "dev": "npx -y serve web -l 3000"
+  }
+}
