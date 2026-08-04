@@ -103,6 +103,9 @@ export function updateWeapons(timestamp) {
             enemy.hp = Math.max(0, enemy.hp - CONFIG.weapons.damage);
             enemy.lastHitTime = timestamp;
             enemy.hpDisplay.value = enemy.hp;
+            if (enemy.innerHpEl) {
+              enemy.innerHpEl.textContent = enemy.hp;
+            }
 
             // Visual feedback
             enemy.el.style.transform = 'translate(-50%, -50%) scale(0.9)';

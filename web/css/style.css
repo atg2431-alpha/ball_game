@@ -21,8 +21,19 @@
   --red-border: rgba(255, 74, 106, 0.3);
 
   /* Typography */
+  --text-primary: #e8e8f0;
+  --text-secondary: rgba(255, 255, 255, 0.4);
   --font-family: 'Outfit', sans-serif;
 
+  /* Modifiers for Light Theme */
+  --btn-bg: rgba(255, 255, 255, 0.05);
+  --btn-hover: rgba(255, 255, 255, 0.1);
+  --sidebar-bg: rgba(255, 255, 255, 0.03);
+  --settings-bg: rgba(10, 10, 15, 0.5);
+  --input-bg: rgba(255, 255, 255, 0.1);
+  --grid-color: rgba(255, 255, 255, 0.015);
+  --board-shadow: inset 0 0 80px rgba(0, 0, 0, 0.3);
+  --overlay-bg: rgba(10, 10, 15, 0.9);
   /* Sizing */
   --board-max-width: 900px;
   --board-aspect-ratio: 4 / 5;
@@ -30,6 +41,30 @@
   --border-radius-lg: 20px;
   --border-radius-md: 14px;
   --border-radius-sm: 10px;
+}
+
+body.light-theme {
+  --bg-primary: #f0f0f5;
+  --bg-secondary: #ffffff;
+  --bg-board: #f9f9fc;
+  --border-glow: rgba(0, 0, 0, 0.1);
+  --border-subtle: rgba(0, 0, 0, 0.05);
+  --text-primary: #12121a;
+  --text-secondary: #555;
+  
+  --btn-bg: rgba(0, 0, 0, 0.03);
+  --btn-hover: rgba(0, 0, 0, 0.06);
+  --sidebar-bg: rgba(255, 255, 255, 0.7);
+  --settings-bg: rgba(255, 255, 255, 0.9);
+  --input-bg: rgba(0, 0, 0, 0.05);
+  --grid-color: rgba(0, 0, 0, 0.03);
+  --board-shadow: inset 0 0 40px rgba(0, 0, 0, 0.05);
+  
+  --overlay-bg: rgba(240, 240, 245, 0.9);
+  --blue-bg: rgba(74, 158, 255, 0.15);
+  --red-bg: rgba(255, 74, 106, 0.15);
+  --bg-grad-1: rgba(74, 158, 255, 0.15);
+  --bg-grad-2: rgba(255, 74, 106, 0.15);
 }
 
 /* ============================================
@@ -46,7 +81,7 @@
 body {
   font-family: var(--font-family);
   background-color: var(--bg-primary);
-  color: #e8e8f0;
+  color: var(--text-primary);
   min-height: 100vh;
   display: flex;
   justify-content: center;
@@ -61,8 +96,8 @@ body::before {
   position: fixed;
   inset: 0;
   background:
-    radial-gradient(ellipse 600px 400px at 20% 30%, rgba(74, 158, 255, 0.06), transparent),
-    radial-gradient(ellipse 600px 400px at 80% 70%, rgba(255, 74, 106, 0.06), transparent);
+    radial-gradient(ellipse 600px 400px at 20% 30%, var(--bg-grad-1, rgba(74, 158, 255, 0.06)), transparent),
+    radial-gradient(ellipse 600px 400px at 80% 70%, var(--bg-grad-2, rgba(255, 74, 106, 0.06)), transparent);
   pointer-events: none;
   z-index: 0;
 }
@@ -159,7 +194,7 @@ body::before {
 .versus-badge {
   font-size: 0.75rem;
   font-weight: 800;
-  color: rgba(255, 255, 255, 0.35);
+  color: var(--text-secondary);
   letter-spacing: 2px;
   flex-shrink: 0;
 }
@@ -177,7 +212,7 @@ body::before {
   overflow: hidden;
   box-shadow:
     0 0 40px rgba(120, 80, 255, 0.06),
-    inset 0 0 80px rgba(0, 0, 0, 0.3);
+    var(--board-shadow);
   transition: box-shadow 0.3s ease;
 
   /* Board background image — override this later */
@@ -189,7 +224,7 @@ body::before {
 .board:hover {
   box-shadow:
     0 0 60px rgba(120, 80, 255, 0.1),
-    inset 0 0 80px rgba(0, 0, 0, 0.3);
+    var(--board-shadow);
 }
 
 /* Subtle grid overlay for depth */
@@ -198,8 +233,8 @@ body::before {
   position: absolute;
   inset: 0;
   background-image:
-    linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+    linear-gradient(var(--grid-color) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
   background-size: 40px 40px;
   pointer-events: none;
   z-index: 0;
@@ -505,6 +540,31 @@ body::before {
   z-index: 1;
 }
 
+/* Theme Toggle Button */
+.btn-theme {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-subtle);
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  font-size: 1.5rem;
+  cursor: pointer;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.btn-theme:hover {
+  transform: scale(1.1);
+  border-color: var(--border-glow);
+}
+
 .sidebar {
   width: 220px;
   display: flex;
@@ -522,7 +582,7 @@ body::before {
   font-weight: 800;
   letter-spacing: 2px;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--text-secondary);
 }
 
 .shape-options {
@@ -537,10 +597,10 @@ body::before {
   gap: 12px;
   width: 100%;
   padding: 12px 16px;
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--btn-bg);
   border: 1px solid transparent;
   border-radius: var(--border-radius-sm);
-  color: #e8e8f0;
+  color: var(--text-primary);
   font-family: var(--font-family);
   font-size: 1rem;
   font-weight: 600;
@@ -549,7 +609,7 @@ body::before {
 }
 
 .btn-shape:hover, .btn-weapon:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--btn-hover);
 }
 
 .btn-shape.btn-shape--active, .btn-weapon.btn-weapon--active {
@@ -607,14 +667,14 @@ body::before {
 }
 
 .weapon-settings {
-  background: rgba(10, 10, 15, 0.5);
+  background: var(--settings-bg);
   border-radius: var(--border-radius-sm);
   padding: 15px;
   margin-top: 10px;
   display: flex;
   flex-direction: column;
   gap: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-subtle);
 }
 
 .setting-row {
@@ -626,9 +686,9 @@ body::before {
 }
 
 .setting-input {
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--input-bg);
   border: 1px solid transparent;
-  color: #fff;
+  color: var(--text-primary);
   border-radius: 4px;
   padding: 4px 8px;
   width: 50px;
@@ -650,7 +710,7 @@ body::before {
 .game-over-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(10, 10, 15, 0.9);
+  background: var(--overlay-bg);
   backdrop-filter: blur(10px);
   z-index: 200;
   display: flex;
@@ -691,7 +751,7 @@ body::before {
 
 .game-over-winner {
   font-size: 1.2rem;
-  color: #fff;
+  color: var(--text-primary);
   margin-bottom: 30px;
 }
 

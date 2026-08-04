@@ -18,12 +18,14 @@ import { state } from '../state.js';
 export function createBall(config, el, hpDisplay, velocity) {
   const ballRect = el.getBoundingClientRect();
   const radius = ballRect.width / 2;
+  const innerHpEl = el.querySelector('.ball__hp');
 
   return {
     id: config.id,
     name: config.name,
     el,
     hpDisplay,
+    innerHpEl,
     radius,
     x: (config.startPosition.x / 100) * state.boardWidth,
     y: (config.startPosition.y / 100) * state.boardHeight,

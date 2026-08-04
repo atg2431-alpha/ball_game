@@ -28,7 +28,28 @@ function init() {
     weaponBtns: document.querySelectorAll('.btn-weapon'),
     settingSpawn: document.getElementById('setting-spawn'),
     settingDuration: document.getElementById('setting-duration'),
+    themeToggleBtn: document.getElementById('theme-toggle'),
   };
+
+  // Theme Logic
+  const savedTheme = localStorage.getItem('theme');
+  if (savedTheme === 'light') {
+    document.body.classList.add('light-theme');
+    elements.themeToggleBtn.textContent = '🌙';
+  }
+
+  elements.themeToggleBtn.addEventListener('click', () => {
+    document.body.classList.toggle('light-theme');
+    const isLight = document.body.classList.contains('light-theme');
+    
+    if (isLight) {
+      localStorage.setItem('theme', 'light');
+      elements.themeToggleBtn.textContent = '🌙';
+    } else {
+      localStorage.setItem('theme', 'dark');
+      elements.themeToggleBtn.textContent = '☀️';
+    }
+  });
 
   // Apply custom images if configured
   applyBoardImage(elements.boardEl, CONFIG.board.backgroundImage);

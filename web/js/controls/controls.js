@@ -207,6 +207,12 @@ export function handleGameOver(winner, elements) {
     // Reset HP displays
     mainEls.ball1HpDisplay.value = CONFIG.ball1.hp;
     mainEls.ball2HpDisplay.value = CONFIG.ball2.hp;
+    
+    // Reset inner ball HP text
+    const ball1Inner = mainEls.ball1El.querySelector('.ball__hp');
+    const ball2Inner = mainEls.ball2El.querySelector('.ball__hp');
+    if (ball1Inner) ball1Inner.textContent = CONFIG.ball1.hp;
+    if (ball2Inner) ball2Inner.textContent = CONFIG.ball2.hp;
 
     stopGame(mainEls);
   };
@@ -247,7 +253,9 @@ export function initSettings(elements) {
     // If game is running, update live HP
     if (state.running && state.balls[playerIndex]) {
       state.balls[playerIndex].hp = val;
-      
+      if (state.balls[playerIndex].innerHpEl) {
+        state.balls[playerIndex].innerHpEl.textContent = val;
+      }
       // If live HP goes to 0 due to manual edit, the loop will catch it and game over
     }
   };
