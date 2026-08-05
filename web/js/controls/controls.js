@@ -9,11 +9,11 @@
 
 import { CONFIG } from '../config.js';
 import { state } from '../state.js';
-import { createBall, renderBall } from '../components/ball.js';
+import { createBall } from '../components/ball.js';
 import { getBoardDimensions } from '../components/board.js';
-import { gameLoop } from '../engine/game-loop.js';
 import { hideAimLines, clearAims, setDraggable } from '../input/drag.js';
 import { resetWeapons } from '../physics/weapons.js';
+import { startRecording, stopRecording } from '../recording.js';
 
 // ─── Velocity Helpers ───────────────────────────────────────
 
@@ -35,72 +35,83 @@ function getVelocity(ballId) {
 
 // ─── Start / Stop ───────────────────────────────────────────
 
+export function resetGameState(elements) {
+  const { boardInner, ball1HpDisplay, ball2HpDisplay } = elements;
+  
+  const rect = boardInner.getBoundingClientRect();
+  state.boardWidth = rect.width;
+  state.boardHeight = rect.height;
+
+  // Initialize balls with default positions
+  state.balls = [
+    createBall(CONFIG.ball1, ball1HpDisplay, {x:0, y:0}),
+    createBall(CONFIG.ball2, ball2HpDisplay, {x:0, y:0}),
+  ];
+  
+  ball1HpDisplay.value = CONFIG.ball1.hp;
+  ball2HpDisplay.value = CONFIG.ball2.hp;
+}
+
 /**
  * Start the simulation.
- * Measures the board, computes velocities from aim, creates balls,
- * and kicks off the game loop.
  */
-function startGame(elements) {
-  const { boardInner, ball1El, ball2El, ball1HpDisplay, ball2HpDisplay, startBtn } = elements;
+async function startGame(elements) {
+  const { startBtn, ball1HpDisplay, ball2HpDisplay } = elements;
 
-  // Measure the board
-  const dims = getBoardDimensions(boardInner);
-  state.boardWidth = dims.width;
-  state.boardHeight = dims.height;
-
-  // Compute velocities (from aim or defaults)
+  // Apply velocities from aim
   const vel1 = getVelocity(CONFIG.ball1.id);
   const vel2 = getVelocity(CONFIG.ball2.id);
+  state.balls[0].vx = vel1.x;
+  state.balls[0].vy = vel1.y;
+  state.balls[1].vx = vel2.x;
+  state.balls[1].vy = vel2.y;
 
-  // Create ball state objects
-  state.balls = [
-    createBall(CONFIG.ball1, ball1El, ball1HpDisplay, vel1),
-    createBall(CONFIG.ball2, ball2El, ball2HpDisplay, vel2),
-  ];
+  // Reset HP
+  state.balls[0].hp = CONFIG.ball1.hp;
+  state.balls[1].hp = CONFIG.ball2.hp;
+  ball1HpDisplay.value = CONFIG.ball1.hp;
+  ball2HpDisplay.value = CONFIG.ball2.hp;
 
-  // Render initial pixel positions
-  for (const ball of state.balls) {
-    renderBall(ball);
-  }
+  state.simulatedTime = undefined;
+  state.lastRealTime = undefined;
 
   // Hide aim visuals and lock dragging
   hideAimLines();
-  setDraggable(ball1El, ball2El, false);
+  setDraggable(false);
+
+  // Attempt recording if enabled
+  if (state.recordingEnabled) {
+    const wrapper = document.querySelector('.game-wrapper');
+    const started = await startRecording(wrapper);
+    if (!started) return;
+  }
 
   state.running = true;
   startBtn.textContent = '■';
   startBtn.classList.add('btn--active');
   startBtn.title = 'Stop Simulation';
-
-  state.animationId = requestAnimationFrame(gameLoop);
 }
 
 /**
  * Stop the simulation and reset everything.
  */
 function stopGame(elements) {
-  const { ball1El, ball2El, startBtn } = elements;
+  const { startBtn } = elements;
 
   state.running = false;
-  if (state.animationId) {
-    cancelAnimationFrame(state.animationId);
-    state.animationId = null;
-  }
 
-  // Reset to CSS percentage-based positions
-  ball1El.style.left = `${CONFIG.ball1.startPosition.x}%`;
-  ball1El.style.top = `${CONFIG.ball1.startPosition.y}%`;
-  ball2El.style.left = `${CONFIG.ball2.startPosition.x}%`;
-  ball2El.style.top = `${CONFIG.ball2.startPosition.y}%`;
+  // Stop recording if active
+  stopRecording(CONFIG.ball1.name, CONFIG.ball2.name);
 
   // Clear aims and re-enable dragging
   clearAims();
-  setDraggable(ball1El, ball2El, true);
+  setDraggable(true);
 
   // Clear any active weapons
   resetWeapons();
 
-  state.balls = [];
+  resetGameState(elements);
+
   startBtn.textContent = '▶';
   startBtn.classList.remove('btn--active');
   startBtn.title = 'Start Simulation';
@@ -113,7 +124,11 @@ function stopGame(elements) {
  * @param {Object} elements - DOM element references
  */
 export function initControls(elements) {
-  elements.startBtn.addEventListener('click', () => {
+  const { startBtn } = elements;
+
+  resetGameState(elements);
+
+  startBtn.addEventListener('click', () => {
     if (state.running) {
       stopGame(elements);
     } else {
@@ -154,6 +169,44 @@ export function initSidebar(elements) {
         const isHidden = targetSettings.style.display === 'none';
         targetSettings.style.display = isHidden ? 'flex' : 'none';
         btn.classList.toggle('active', isHidden);
+      }
+    });
+  });
+
+  // Speed Controls
+  const speedBtns = document.querySelectorAll('.btn-speed');
+  speedBtns.forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      speedBtns.forEach(b => b.classList.remove('active'));
+      e.currentTarget.classList.add('active');
+      state.gameSpeed = parseFloat(e.currentTarget.dataset.speed);
+    });
+  });
+
+  // Recording Toggle
+  const recordToggle = document.getElementById('record-toggle');
+  if (recordToggle) {
+    recordToggle.addEventListener('change', (e) => {
+      state.recordingEnabled = e.target.checked;
+    });
+  }
+
+  // Sidebar Tabs Navigation
+  const tabBtnsList = document.querySelectorAll('.btn-tab');
+  const tabContentsList = document.querySelectorAll('.tab-content');
+
+  tabBtnsList.forEach(btn => {
+    btn.addEventListener('click', () => {
+      // Deactivate all
+      tabBtnsList.forEach(b => b.classList.remove('btn-tab--active'));
+      tabContentsList.forEach(c => c.style.display = 'none');
+      
+      // Activate clicked
+      btn.classList.add('btn-tab--active');
+      const targetId = btn.dataset.target;
+      const targetContent = document.getElementById(targetId);
+      if (targetContent) {
+        targetContent.style.display = 'block';
       }
     });
   });
@@ -205,10 +258,9 @@ export function initSidebar(elements) {
  */
 export function handleGameOver(winner, elements) {
   state.running = false;
-  if (state.animationId) {
-    cancelAnimationFrame(state.animationId);
-    state.animationId = null;
-  }
+
+  // Stop recording immediately if active
+  stopRecording(CONFIG.ball1.name, CONFIG.ball2.name);
 
   // Find elements globally since we might not have passed them directly
   // or we can just fetch them from the DOM
@@ -228,24 +280,12 @@ export function handleGameOver(winner, elements) {
     // It's cleaner to dispatch a custom event or just reload the page.
     // For now, we'll manually reset using global query:
     const mainEls = {
-      ball1El: document.getElementById('ball-1'),
-      ball2El: document.getElementById('ball-2'),
       startBtn: document.getElementById('start-btn'),
       boardInner: document.querySelector('.board__inner'),
       ball1HpDisplay: document.getElementById('ball-1-hp'),
       ball2HpDisplay: document.getElementById('ball-2-hp'),
     };
     
-    // Reset HP displays
-    mainEls.ball1HpDisplay.value = CONFIG.ball1.hp;
-    mainEls.ball2HpDisplay.value = CONFIG.ball2.hp;
-    
-    // Reset inner ball HP text
-    const ball1Inner = mainEls.ball1El.querySelector('.ball__hp');
-    const ball2Inner = mainEls.ball2El.querySelector('.ball__hp');
-    if (ball1Inner) ball1Inner.textContent = CONFIG.ball1.hp;
-    if (ball2Inner) ball2Inner.textContent = CONFIG.ball2.hp;
-
     stopGame(mainEls);
   };
 
@@ -290,9 +330,7 @@ export function initSettings(elements) {
     // If game is running, update live HP
     if (state.running && state.balls[playerIndex]) {
       state.balls[playerIndex].hp = val;
-      if (state.balls[playerIndex].innerHpEl) {
-        state.balls[playerIndex].innerHpEl.textContent = val;
-      }
+      state.balls[playerIndex].hpDisplay.value = val;
       // If live HP goes to 0 due to manual edit, the loop will catch it and game over
     }
   };

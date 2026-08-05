@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "description": "Instagram-style ball battle simulation game",
   "scripts": {
-    "dev": "npx -y serve web -l 3000"
+    "dev": "node app/server.js"
+  },
+  "dependencies": {
+    "express": "^4.22.2"
   }
 }

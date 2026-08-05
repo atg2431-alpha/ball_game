@@ -1,53 +1,64 @@
 /**
  * Game Loop (Engine)
  *
- * The core animation loop that drives the simulation.
- * Each frame: move balls → check collisions → render.
+ * The core physics loop that drives the simulation.
+ * Each frame: move balls → check collisions → weapons.
+ * Rendering is handled by the master loop in main.js.
  */
 
 import { state } from '../state.js';
 import { updateBall } from '../physics/movement.js';
 import { resolveBallCollision } from '../physics/collision.js';
-import { renderBall } from '../components/ball.js';
 import { spawnWeapon, updateWeapons, updateProjectiles } from '../physics/weapons.js';
 import { handleGameOver } from '../controls/controls.js';
 
 /**
- * Run one frame of the simulation and schedule the next.
+ * Run one frame of the simulation (physics only).
  * @param {number} timestamp - RequestAnimationFrame time
  */
 export function gameLoop(timestamp) {
   if (!state.running) return;
 
-  // Move balls and handle wall bounces
-  for (const ball of state.balls) {
-    updateBall(ball, state.boardWidth, state.boardHeight, state.boardShape);
+  let delta = timestamp - (state.lastRealTime || timestamp);
+  if (delta > 50) delta = 16; // Cap large jumps (e.g. tab backgrounded)
+  state.lastRealTime = timestamp;
+
+  if (state.simulatedTime === undefined) {
+    state.simulatedTime = timestamp;
   }
 
-  // Handle ball-ball collisions
-  if (state.balls.length === 2) {
-    resolveBallCollision(state.balls[0], state.balls[1]);
-  }
-  
-  // Handle Weapons and Projectiles
-  spawnWeapon(timestamp);
-  updateWeapons(timestamp);
-  updateProjectiles(timestamp);
+  const speedMultiplier = state.gameSpeed || 1;
 
-  // Render updated positions to the DOM
+  for (let step = 0; step < speedMultiplier; step++) {
+    state.simulatedTime += delta;
+    const simTime = state.simulatedTime;
+
+    // Move balls and handle wall bounces
+    for (const ball of state.balls) {
+      updateBall(ball, state.boardWidth, state.boardHeight, state.boardShape);
+    }
+
+    // Handle ball-ball collisions
+    if (state.balls.length === 2) {
+      resolveBallCollision(state.balls[0], state.balls[1]);
+    }
+    
+    // Handle Weapons and Projectiles
+    spawnWeapon(simTime);
+    updateWeapons(simTime);
+    updateProjectiles(simTime);
+  }
+
+  // Check win condition
   let winner = null;
   for (const ball of state.balls) {
-    renderBall(ball);
     if (ball.hp <= 0) {
-      // Find the other ball that won
       winner = state.balls.find(b => b.id !== ball.id);
     }
   }
 
   if (winner) {
     handleGameOver(winner);
-    return; // Stop loop
   }
-
-  state.animationId = requestAnimationFrame(gameLoop);
 }
+

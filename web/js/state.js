@@ -22,4 +22,5 @@ export const state = {
   spawnedItems: [], // { id, x, y, el, type }
   lastSpawnTime: 0,
   projectiles: [],  // { x, y, dx, dy, speed, lifetime, spawnTime, el, ownerId }
+  gameSpeed: 1,
 };

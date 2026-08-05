@@ -6,21 +6,17 @@
  */
 
 import { CONFIG } from './config.js';
-import { applyBallImage } from './components/ball.js';
 import { applyBoardImage } from './components/board.js';
 import { initControls, initSidebar, initSettings } from './controls/controls.js';
 import { initDrag } from './input/drag.js';
+import { initRenderer, renderFrame } from './engine/renderer.js';
+import { gameLoop } from './engine/game-loop.js';
+import { state } from './state.js';
 
-/**
- * Gather all DOM references and boot the game.
- */
 function init() {
-  // Collect all DOM elements needed across modules
   const elements = {
     boardEl: document.getElementById('game-board'),
     boardInner: document.querySelector('#game-board .board__inner'),
-    ball1El: document.getElementById('ball-1'),
-    ball2El: document.getElementById('ball-2'),
     ball1HpDisplay: document.getElementById('ball-1-hp'),
     ball2HpDisplay: document.getElementById('ball-2-hp'),
     startBtn: document.getElementById('start-btn'),
@@ -29,6 +25,7 @@ function init() {
     settingSpawn: document.getElementById('setting-spawn'),
     settingDuration: document.getElementById('setting-duration'),
     themeToggleBtn: document.getElementById('theme-toggle'),
+    gameCanvas: document.getElementById('game-canvas')
   };
 
   // Theme Logic
@@ -51,20 +48,28 @@ function init() {
     }
   });
 
-  // Apply custom images if configured
   applyBoardImage(elements.boardEl, CONFIG.board.backgroundImage);
-  applyBallImage(elements.ball1El, CONFIG.ball1.image);
-  applyBallImage(elements.ball2El, CONFIG.ball2.image);
 
-  // Wire up start/stop controls and sidebar
+  // Initialize Canvas Renderer
+  initRenderer('game-canvas');
+
+  // Initialize Modules
   initControls(elements);
   initSidebar(elements);
   initSettings(elements);
+  initDrag(elements.gameCanvas);
 
-  // Initialize drag-to-aim input
-  initDrag(elements);
+  // Master Game Loop
+  function masterLoop(timestamp) {
+    if (state.running) {
+      gameLoop(timestamp);
+    }
+    renderFrame();
+    requestAnimationFrame(masterLoop);
+  }
+  requestAnimationFrame(masterLoop);
 
-  console.log('🎮 Ball Battle Simulator initialized');
+  console.log('🎮 Ball Battle Simulator initialized (Canvas Mode)');
 }
 
 document.addEventListener('DOMContentLoaded', init);

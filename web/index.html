@@ -18,11 +18,12 @@
 
   <div class="main-container">
     <!-- Sidebar -->
-    <aside class="sidebar">
-      <div class="sidebar-tabs">
-        <button class="tab-btn active" data-tab="shape">SHAPE</button>
-        <button class="tab-btn" data-tab="weapon">WEAPON</button>
-      </div>
+    <div class="sidebar-wrapper" style="display: flex; flex-direction: column; gap: 16px;">
+      <aside class="sidebar">
+        <div class="sidebar-tabs">
+          <button class="btn-tab btn-tab--active" data-target="tab-shape">SHAPE</button>
+          <button class="btn-tab" data-target="tab-weapon">WEAPON</button>
+        </div>
 
       <!-- SHAPE TAB -->
       <div id="tab-shape" class="tab-content active">
@@ -90,8 +91,24 @@
           </div>
 
         </div>
-      </div>
-    </aside>
+      </aside>
+
+      <!-- RECORDING PANEL -->
+      <aside class="sidebar recording-sidebar">
+        <div class="recording-options">
+          <label class="toggle-container" title="Enable Screen Recording">
+            <span class="toggle-label">Record Match</span>
+            <div class="toggle-switch">
+              <input type="checkbox" id="record-toggle">
+              <span class="slider"></span>
+            </div>
+          </label>
+          <p class="recording-desc" style="font-size: 0.8rem; color: var(--text-muted); margin-top: 12px; line-height: 1.4;">
+            When enabled, the match will be automatically recorded and saved as a video file when it ends.
+          </p>
+        </div>
+      </aside>
+    </div>
 
     <div class="game-wrapper">
     <h1 class="game-title">Ball Battle Simulator</h1>
@@ -113,26 +130,17 @@
     <div class="board" id="game-board">
       <!-- Board background image can be set via CSS or JS later -->
       <div class="board__inner">
-        <!-- Container for spawned items/weapons -->
-        <div id="weapon-container"></div>
-
-        <!-- Ball 1 (Blue) -->
-        <div class="ball ball--blue" id="ball-1" style="left: 25%; top: 55%;">
-          <!-- Image can be placed inside this div later -->
-          <span class="ball__hp">100</span>
-        </div>
-
-        <!-- Ball 2 (Red) -->
-        <div class="ball ball--red" id="ball-2" style="left: 65%; top: 35%;">
-          <!-- Image can be placed inside this div later -->
-          <span class="ball__hp">100</span>
-        </div>
-
+        <canvas id="game-canvas"></canvas>
       </div>
     </div>
 
       <!-- Controls -->
       <div class="controls">
+        <div class="speed-controls" id="speed-controls">
+          <button class="btn-speed active" data-speed="1">1x</button>
+          <button class="btn-speed" data-speed="2">2x</button>
+          <button class="btn-speed" data-speed="4">4x</button>
+        </div>
         <button class="btn-start" id="start-btn" title="Start Simulation">▶</button>
       </div>
     </div>

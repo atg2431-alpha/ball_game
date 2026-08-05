@@ -63,4 +63,10 @@ export const CONFIG = {
       bulletLifetime: 2000, // ms before despawn
     }
   },
+
+  recording: {
+    fps: 60,                     // Frames per second for the recording
+    videoBitsPerSecond: 8000000, // Video bitrate (8 Mbps for high quality)
+    mimeType: 'video/webm',
+  }
 };
