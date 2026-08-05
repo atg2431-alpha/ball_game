@@ -145,16 +145,18 @@ export function initSidebar(elements) {
   });
 
   // Settings Dropdown Toggle
-  const swordSettingsBtn = document.getElementById('sword-settings-btn');
-  const swordSettings = document.getElementById('sword-settings');
-
-  if (swordSettingsBtn && swordSettings) {
-    swordSettingsBtn.addEventListener('click', () => {
-      const isHidden = swordSettings.style.display === 'none';
-      swordSettings.style.display = isHidden ? 'flex' : 'none';
-      swordSettingsBtn.classList.toggle('active', isHidden);
+  const settingToggles = document.querySelectorAll('.btn-settings-toggle');
+  settingToggles.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const targetId = btn.dataset.target;
+      const targetSettings = document.getElementById(targetId);
+      if (targetSettings) {
+        const isHidden = targetSettings.style.display === 'none';
+        targetSettings.style.display = isHidden ? 'flex' : 'none';
+        btn.classList.toggle('active', isHidden);
+      }
     });
-  }
+  });
 
   elements.shapeBtns.forEach(btn => {
     btn.addEventListener('click', (e) => {
@@ -255,23 +257,28 @@ export function handleGameOver(winner, elements) {
  */
 export function initSettings(elements) {
   // Weapon parameters
-  if (elements.settingSpawn) {
-    elements.settingSpawn.addEventListener('change', (e) => {
-      let val = parseInt(e.target.value, 10);
-      if (isNaN(val) || val < 1) val = 1;
-      e.target.value = val;
-      CONFIG.weapons.spawnInterval = val * 1000;
-    });
-  }
+  const bindWeaponInput = (id, weaponConfig, key, multiplier = 1) => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.addEventListener('change', (e) => {
+        let val = parseFloat(e.target.value);
+        if (isNaN(val) || val <= 0) val = 1;
+        e.target.value = val;
+        weaponConfig[key] = val * multiplier;
+      });
+    }
+  };
 
-  if (elements.settingDuration) {
-    elements.settingDuration.addEventListener('change', (e) => {
-      let val = parseInt(e.target.value, 10);
-      if (isNaN(val) || val < 1) val = 1;
-      e.target.value = val;
-      CONFIG.weapons.duration = val * 1000;
-    });
-  }
+  bindWeaponInput('sword-spawn', CONFIG.weapons.sword, 'spawnInterval', 1000);
+  bindWeaponInput('sword-duration', CONFIG.weapons.sword, 'duration', 1000);
+  
+  bindWeaponInput('longsword-spawn', CONFIG.weapons.longsword, 'spawnInterval', 1000);
+  bindWeaponInput('longsword-duration', CONFIG.weapons.longsword, 'duration', 1000);
+  
+  bindWeaponInput('gun-spawn', CONFIG.weapons.gun, 'spawnInterval', 1000);
+  bindWeaponInput('gun-duration', CONFIG.weapons.gun, 'duration', 1000);
+  bindWeaponInput('gun-fire-rate', CONFIG.weapons.gun, 'fireRate', 1000);
+  bindWeaponInput('gun-bullet-life', CONFIG.weapons.gun, 'bulletLifetime', 1000);
 
   // HP parameters
   const updateHP = (inputEl, playerConfig, playerIndex) => {

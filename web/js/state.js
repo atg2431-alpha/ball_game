@@ -19,6 +19,7 @@ export const state = {
 
   // Weapons and Combat
   selectedWeapon: 'sword',
-  spawnedItems: [], // { id, x, y, el }
+  spawnedItems: [], // { id, x, y, el, type }
   lastSpawnTime: 0,
+  projectiles: [],  // { x, y, dx, dy, speed, lifetime, spawnTime, el, ownerId }
 };

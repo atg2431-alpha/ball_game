@@ -41,29 +41,54 @@
       <!-- WEAPON TAB -->
       <div id="tab-weapon" class="tab-content">
         <div class="shape-options">
-          <div class="weapon-item">
-            <div class="weapon-list" style="display: flex; flex-direction: column; gap: 8px; flex: 1;">
-              <button class="btn-weapon btn-weapon--active" data-weapon="sword">
+          
+          <!-- Sword -->
+          <div class="weapon-row">
+            <div class="weapon-main" style="display: flex; gap: 8px;">
+              <button class="btn-weapon btn-weapon--active" data-weapon="sword" style="flex: 1;">
                 <div class="shape-icon shape-icon--sword">⚔️</div>
                 Sword
               </button>
-              <button class="btn-weapon" data-weapon="longsword">
+              <button class="btn-settings-toggle" data-target="sword-settings" title="Weapon Settings">⚙️</button>
+            </div>
+            <div class="weapon-settings" id="sword-settings" style="display: none;">
+              <label class="setting-row"><span>Spawn (s)</span><input type="number" id="sword-spawn" class="setting-input" value="10" min="1"></label>
+              <label class="setting-row"><span>Duration (s)</span><input type="number" id="sword-duration" class="setting-input" value="5" min="1"></label>
+            </div>
+          </div>
+
+          <!-- Long Sword -->
+          <div class="weapon-row">
+            <div class="weapon-main" style="display: flex; gap: 8px;">
+              <button class="btn-weapon" data-weapon="longsword" style="flex: 1;">
                 <div class="shape-icon shape-icon--sword">🗡️</div>
                 Long Sword
               </button>
+              <button class="btn-settings-toggle" data-target="longsword-settings" title="Weapon Settings">⚙️</button>
             </div>
-            <button class="btn-settings-toggle" id="sword-settings-btn" title="Weapon Settings">⚙️</button>
+            <div class="weapon-settings" id="longsword-settings" style="display: none;">
+              <label class="setting-row"><span>Spawn (s)</span><input type="number" id="longsword-spawn" class="setting-input" value="10" min="1"></label>
+              <label class="setting-row"><span>Duration (s)</span><input type="number" id="longsword-duration" class="setting-input" value="5" min="1"></label>
+            </div>
           </div>
-          <div class="weapon-settings" id="sword-settings" style="display: none;">
-            <label class="setting-row">
-              <span>Spawn (s)</span>
-              <input type="number" id="setting-spawn" class="setting-input" value="10" min="1" step="1">
-            </label>
-            <label class="setting-row">
-              <span>Duration (s)</span>
-              <input type="number" id="setting-duration" class="setting-input" value="5" min="1" step="1">
-            </label>
+
+          <!-- Gun -->
+          <div class="weapon-row">
+            <div class="weapon-main" style="display: flex; gap: 8px;">
+              <button class="btn-weapon" data-weapon="gun" style="flex: 1;">
+                <div class="shape-icon shape-icon--sword">🔫</div>
+                Gun
+              </button>
+              <button class="btn-settings-toggle" data-target="gun-settings" title="Weapon Settings">⚙️</button>
+            </div>
+            <div class="weapon-settings" id="gun-settings" style="display: none;">
+              <label class="setting-row"><span>Spawn (s)</span><input type="number" id="gun-spawn" class="setting-input" value="12" min="1"></label>
+              <label class="setting-row"><span>Duration (s)</span><input type="number" id="gun-duration" class="setting-input" value="6" min="1"></label>
+              <label class="setting-row"><span>Fire Rate (s)</span><input type="number" id="gun-fire-rate" class="setting-input" value="1" min="1"></label>
+              <label class="setting-row"><span>Bullet Life (s)</span><input type="number" id="gun-bullet-life" class="setting-input" value="2" min="1"></label>
+            </div>
           </div>
+
         </div>
       </div>
     </aside>

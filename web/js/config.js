@@ -41,11 +41,26 @@ export const CONFIG = {
   },
 
   weapons: {
-    spawnInterval: 10000, // ms between spawns
-    duration: 5000,       // ms for buff duration
     orbitRadius: 40,      // distance from center of large ball
     orbitSpeed: 0.005,    // radians per ms
-    damage: 10,           // HP deducted on hit
     invincibility: 500,   // ms cooldown after getting hit
+    sword: {
+      spawnInterval: 10000,
+      duration: 5000,
+      damage: 10,
+    },
+    longsword: {
+      spawnInterval: 10000,
+      duration: 5000,
+      damage: 15,
+    },
+    gun: {
+      spawnInterval: 12000,
+      duration: 6000,
+      damage: 5,            // damage per bullet
+      fireRate: 1000,       // ms between shots
+      bulletSpeed: 6,       // pixels per frame
+      bulletLifetime: 2000, // ms before despawn
+    }
   },
 };

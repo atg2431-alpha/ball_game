@@ -9,7 +9,7 @@ import { state } from '../state.js';
 import { updateBall } from '../physics/movement.js';
 import { resolveBallCollision } from '../physics/collision.js';
 import { renderBall } from '../components/ball.js';
-import { spawnWeapon, updateWeapons } from '../physics/weapons.js';
+import { spawnWeapon, updateWeapons, updateProjectiles } from '../physics/weapons.js';
 import { handleGameOver } from '../controls/controls.js';
 
 /**
@@ -29,9 +29,10 @@ export function gameLoop(timestamp) {
     resolveBallCollision(state.balls[0], state.balls[1]);
   }
   
-  // Handle Weapons
+  // Handle Weapons and Projectiles
   spawnWeapon(timestamp);
   updateWeapons(timestamp);
+  updateProjectiles(timestamp);
 
   // Render updated positions to the DOM
   let winner = null;

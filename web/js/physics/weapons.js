@@ -8,7 +8,11 @@ let weaponIdCounter = 0;
  * @param {number} timestamp - Current game time in ms
  */
 export function spawnWeapon(timestamp) {
-  if (timestamp - state.lastSpawnTime > CONFIG.weapons.spawnInterval) {
+  const type = state.selectedWeapon;
+  // If for some reason type isn't set, default to sword config
+  const weaponConfig = CONFIG.weapons[type] || CONFIG.weapons.sword;
+
+  if (timestamp - state.lastSpawnTime > weaponConfig.spawnInterval) {
     state.lastSpawnTime = timestamp;
 
     const container = document.getElementById('weapon-container');
@@ -19,10 +23,17 @@ export function spawnWeapon(timestamp) {
     const x = padding + Math.random() * (state.boardWidth - padding * 2);
     const y = padding + Math.random() * (state.boardHeight - padding * 2);
 
-    const type = state.selectedWeapon;
     const el = document.createElement('div');
-    el.className = type === 'longsword' ? 'item-longsword' : 'item-sword';
-    el.textContent = type === 'longsword' ? '🗡️' : '⚔️';
+    if (type === 'longsword') {
+      el.className = 'item-longsword';
+      el.textContent = '🗡️';
+    } else if (type === 'gun') {
+      el.className = 'item-gun';
+      el.textContent = '🔫';
+    } else {
+      el.className = 'item-sword';
+      el.textContent = '⚔️';
+    }
     el.style.left = `${x}px`;
     el.style.top = `${y}px`;
     container.appendChild(el);
@@ -55,18 +66,30 @@ export function updateWeapons(timestamp) {
 
       if (dist < ball.radius + item.radius) {
         // Absorb!
-        if (ball.weaponExpiry && ball.weaponExpiry > timestamp) {
-          ball.weaponExpiry += CONFIG.weapons.duration;
+        const weaponConfig = CONFIG.weapons[item.type];
+        if (ball.weaponExpiry && ball.weaponExpiry > timestamp && ball.weaponType === item.type) {
+          ball.weaponExpiry += weaponConfig.duration;
         } else {
-          ball.weaponExpiry = timestamp + CONFIG.weapons.duration;
+          ball.weaponExpiry = timestamp + weaponConfig.duration;
+          ball.weaponType = item.type;
+          ball.lastFireTime = 0; // For gun
           
           // Create orbiting element
+          if (ball.orbitEl) ball.orbitEl.remove();
+          
           const orbitEl = document.createElement('div');
-          orbitEl.className = item.type === 'longsword' ? 'orbit-longsword' : 'orbit-sword';
-          orbitEl.textContent = item.type === 'longsword' ? '🗡️' : '⚔️';
+          if (item.type === 'longsword') {
+            orbitEl.className = 'orbit-longsword';
+            orbitEl.textContent = '🗡️';
+          } else if (item.type === 'gun') {
+            orbitEl.className = 'orbit-gun';
+            orbitEl.textContent = '🔫';
+          } else {
+            orbitEl.className = 'orbit-sword';
+            orbitEl.textContent = '⚔️';
+          }
           document.getElementById('weapon-container').appendChild(orbitEl);
           ball.orbitEl = orbitEl;
-          ball.weaponType = item.type;
         }
         
         // Remove item from board
@@ -90,21 +113,19 @@ export function updateWeapons(timestamp) {
       const swordY = ball.y + Math.sin(angle) * CONFIG.weapons.orbitRadius;
 
       // Render orbit
+      const edgeX = ball.x + Math.cos(angle) * ball.radius;
+      const edgeY = ball.y + Math.sin(angle) * ball.radius;
+
       if (ball.orbitEl) {
         if (ball.weaponType === 'longsword') {
-          // Long sword sticks out radially from the edge
-          // The emoji 🗡️ naturally points down-left. We want it to point outward (angle).
-          // We add Math.PI / 4 (45 degrees) to make it point up-right relative to container,
-          // but CSS rotation starts from top. Let's just use CSS transform and rotate(angle).
-          const edgeX = ball.x + Math.cos(angle) * ball.radius;
-          const edgeY = ball.y + Math.sin(angle) * ball.radius;
           ball.orbitEl.style.left = `${edgeX}px`;
           ball.orbitEl.style.top = `${edgeY}px`;
-          // Rotate it so it points outward. +90 deg or +45 deg depends on emoji orientation.
-          // 🗡️ points top-right, or bottom-left depending on OS. Usually it's diagonal.
-          // A standard CSS rotate(${angle}rad) will work if we adjust the baseline in CSS.
-          // Added Math.PI (180deg) to flip the sword outward.
           ball.orbitEl.style.transform = `translate(0%, -50%) rotate(${angle + Math.PI/4 + Math.PI}rad)`;
+        } else if (ball.weaponType === 'gun') {
+          ball.orbitEl.style.left = `${edgeX}px`;
+          ball.orbitEl.style.top = `${edgeY}px`;
+          // 🔫 emoji usually points left. To point it outward, we rotate:
+          ball.orbitEl.style.transform = `translate(0%, -50%) rotate(${angle + Math.PI}rad)`;
         } else {
           ball.orbitEl.style.left = `${swordX}px`;
           ball.orbitEl.style.top = `${swordY}px`;
@@ -131,7 +152,7 @@ export function updateWeapons(timestamp) {
             const dist = Math.sqrt((enemy.x - ProjX) ** 2 + (enemy.y - ProjY) ** 2);
             
             if (dist < enemy.radius + 6) hit = true; // 6 is half-width of blade
-          } else {
+          } else if (ball.weaponType === 'sword') {
             // Normal point collision
             const dx = enemy.x - swordX;
             const dy = enemy.y - swordY;
@@ -142,7 +163,7 @@ export function updateWeapons(timestamp) {
           if (hit) {
           // Hit! Check invincibility
           if (!enemy.lastHitTime || timestamp - enemy.lastHitTime > CONFIG.weapons.invincibility) {
-            enemy.hp = Math.max(0, enemy.hp - CONFIG.weapons.damage);
+            enemy.hp = Math.max(0, enemy.hp - CONFIG.weapons[ball.weaponType].damage);
             enemy.lastHitTime = timestamp;
             enemy.hpDisplay.value = enemy.hp;
             if (enemy.innerHpEl) {
@@ -155,6 +176,35 @@ export function updateWeapons(timestamp) {
               if (enemy.el) enemy.el.style.transform = 'translate(-50%, -50%) scale(1)';
             }, 150);
           }
+        }
+      }
+
+      // Gun Firing Logic
+      if (ball.weaponType === 'gun') {
+        const gunConfig = CONFIG.weapons.gun;
+        if (!ball.lastFireTime) ball.lastFireTime = timestamp;
+        
+        if (timestamp - ball.lastFireTime > gunConfig.fireRate) {
+          ball.lastFireTime = timestamp;
+          
+          // Spawn Bullet
+          const bulletEl = document.createElement('div');
+          bulletEl.className = 'bullet';
+          bulletEl.style.left = `${edgeX}px`;
+          bulletEl.style.top = `${edgeY}px`;
+          document.getElementById('weapon-container').appendChild(bulletEl);
+
+          state.projectiles.push({
+            x: edgeX,
+            y: edgeY,
+            dx: Math.cos(angle),
+            dy: Math.sin(angle),
+            speed: gunConfig.bulletSpeed,
+            lifetime: gunConfig.bulletLifetime,
+            spawnTime: timestamp,
+            ownerId: ball.id,
+            el: bulletEl
+          });
         }
       }
     } else if (ball.weaponExpiry && ball.weaponExpiry <= timestamp) {
@@ -181,5 +231,69 @@ export function resetWeapons() {
     ball.weaponExpiry = null;
     ball.orbitEl = null;
     ball.lastHitTime = null;
+    ball.weaponType = null;
+    ball.lastFireTime = null;
+  }
+}
+
+/**
+ * Updates projectiles (bullets): movement, collisions, lifecycle.
+ * @param {number} timestamp 
+ */
+export function updateProjectiles(timestamp) {
+  for (let i = state.projectiles.length - 1; i >= 0; i--) {
+    const proj = state.projectiles[i];
+
+    // Check lifetime
+    if (timestamp - proj.spawnTime > proj.lifetime) {
+      proj.el.remove();
+      state.projectiles.splice(i, 1);
+      continue;
+    }
+
+    // Move bullet
+    proj.x += proj.dx * proj.speed;
+    proj.y += proj.dy * proj.speed;
+    proj.el.style.left = `${proj.x}px`;
+    proj.el.style.top = `${proj.y}px`;
+
+    // Boundary collision
+    if (proj.x < 0 || proj.x > state.boardWidth || proj.y < 0 || proj.y > state.boardHeight) {
+      proj.el.remove();
+      state.projectiles.splice(i, 1);
+      continue;
+    }
+
+    // Enemy collision
+    let hitEnemy = false;
+    for (const enemy of state.balls) {
+      if (enemy.id !== proj.ownerId) {
+        const dx = enemy.x - proj.x;
+        const dy = enemy.y - proj.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        const bulletRadius = 4; // Half of 8px
+
+        if (dist < enemy.radius + bulletRadius) {
+          hitEnemy = true;
+          if (!enemy.lastHitTime || timestamp - enemy.lastHitTime > CONFIG.weapons.invincibility) {
+            enemy.hp = Math.max(0, enemy.hp - CONFIG.weapons.gun.damage);
+            enemy.lastHitTime = timestamp;
+            enemy.hpDisplay.value = enemy.hp;
+            if (enemy.innerHpEl) enemy.innerHpEl.textContent = enemy.hp;
+
+            enemy.el.style.transform = 'translate(-50%, -50%) scale(0.9)';
+            setTimeout(() => {
+              if (enemy.el) enemy.el.style.transform = 'translate(-50%, -50%) scale(1)';
+            }, 150);
+          }
+          break; // Stop checking enemies for this bullet
+        }
+      }
+    }
+
+    if (hitEnemy) {
+      proj.el.remove();
+      state.projectiles.splice(i, 1);
+    }
   }
 }
