@@ -5,6 +5,19 @@
  */
 import { state } from '../state.js';
 import { CONFIG } from '../config.js';
+import { camera } from '../systems/camera.js';
+import { particleSystem } from '../systems/particle.js';
+import { renderPowerupItems, renderActivePowerups } from '../systems/powerup-registry.js';
+import { renderShrinkZone } from '../hazards/shrink-zone.js';
+import { renderGravityWells } from '../hazards/gravity-well.js';
+import { renderBouncePads } from '../hazards/bounce-pad.js';
+import { renderDamageNumbers } from '../ui/damage-numbers.js';
+import { renderBanners } from '../ui/event-banner.js';
+import { renderHpBars } from '../ui/hp-bar.js';
+import { renderTimer } from '../ui/match-timer.js';
+import { renderCombo } from '../ui/combo-counter.js';
+import { renderShockwaves } from '../effects/death-explosion.js';
+import { renderFlash } from '../effects/powerup-flash.js';
 
 let canvas;
 let ctx;
@@ -41,35 +54,82 @@ export function initRenderer(canvasId) {
   return canvas;
 }
 
+export function handleResize() {
+  if (!canvas) return;
+  const rect = canvas.getBoundingClientRect();
+  width = rect.width;
+  height = rect.height;
+  dpr = window.devicePixelRatio || 1;
+  canvas.width = width * dpr;
+  canvas.height = height * dpr;
+  ctx.scale(dpr, dpr);
+  state.boardWidth = width;
+  state.boardHeight = height;
+}
+
 /**
  * Main render function called every frame.
  */
 export function renderFrame() {
   if (!ctx) return;
-
-  // Clear frame
+  const now = performance.now();
   ctx.clearRect(0, 0, width, height);
 
-  // Draw Aim Lines (pre-game)
+  camera.applyTransform(ctx, width, height);
+
+  // Layer 1: Arena hazards (behind everything)
+  renderShrinkZone(ctx, now);
+  renderGravityWells(ctx, now);
+  renderBouncePads(ctx, now);
+
+  // Layer 2: Aim lines & ground items
   drawAimLines();
-
-  // Draw Weapons (Spawned items on ground)
   drawGroundWeapons();
+  renderPowerupItems(ctx, now);
 
-  // Draw Projectiles
+  // Layer 3: Projectiles
   drawProjectiles();
 
-  // Draw Balls + Orbiting Weapons
+  // Layer 4: Balls + effects
   for (const ball of state.balls) {
+    drawTrail(ball);
     drawBall(ball);
     drawOrbitingWeapon(ball);
+    drawStatusIndicators(ball);
+    renderActivePowerups(ctx, ball, now);
   }
+
+  // Layer 5: Active zones (freeze zones, etc.)
+  renderActiveZones(ctx, now);
+
+  // Layer 6: Particles
+  particleSystem.render(ctx);
+
+  // Layer 7: UI overlays
+  renderDamageNumbers(ctx);
+  renderBanners(ctx, width, height);
+
+  // Layer 8: Shockwave rings (death explosion)
+  renderShockwaves(ctx);
+
+  camera.resetTransform(ctx);
+
+  // Layer 9: HUD overlays (outside camera transform for stable positioning)
+  renderHpBars(ctx, state.balls, width, height);
+  renderTimer(ctx, width);
+  renderCombo(ctx, width, height);
+
+  // Layer 10: Screen flash (on top of everything)
+  renderFlash(ctx, width, height);
 }
 
 function drawBall(ball) {
   const isBlue = ball.id === 'ball-1';
   
   ctx.save();
+  if (ball.isGhost) {
+    ctx.globalAlpha = 0.4;
+  }
   ctx.beginPath();
   ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
   
@@ -206,3 +266,134 @@ function drawAimLines() {
   ctx.restore();
 }
 
+function drawTrail(ball) {
+  if (!ball.trail || ball.trail.length < 2) return;
+  
+  const isBlue = ball.id === 'ball-1';
+  const baseColor = isBlue ? [96, 165, 250] : [248, 113, 113]; // RGB values
+  
+  ctx.save();
+  ctx.lineCap = 'round';
+  
+  for (let i = 1; i < ball.trail.length; i++) {
+    const prev = ball.trail[i - 1];
+    const curr = ball.trail[i];
+    const alpha = 1 - (i / ball.trail.length);
+    const width = ball.radius * 2 * (1 - i / ball.trail.length) * 0.6;
+    
+    if (width < 0.5) continue;
+    
+    ctx.beginPath();
+    ctx.moveTo(prev.x, prev.y);
+    ctx.lineTo(curr.x, curr.y);
+    ctx.strokeStyle = `rgba(${baseColor[0]}, ${baseColor[1]}, ${baseColor[2]}, ${alpha * 0.3})`;
+    ctx.lineWidth = width;
+    ctx.stroke();
+  }
+  
+  ctx.restore();
+}
+
+function drawStatusIndicators(ball) {
+  if (!ball.statusEffects || ball.statusEffects.length === 0) return;
+  
+  ctx.save();
+  
+  for (const effect of ball.statusEffects) {
+    switch (effect.type) {
+      case 'freeze':
+        // Ice ring around ball
+        ctx.beginPath();
+        ctx.arc(ball.x, ball.y, ball.radius + 4, 0, Math.PI * 2);
+        ctx.strokeStyle = 'rgba(100, 200, 255, 0.6)';
+        ctx.lineWidth = 2;
+        ctx.setLineDash([4, 4]);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        break;
+        
+      case 'burn':
+        // Fire glow
+        ctx.beginPath();
+        ctx.arc(ball.x, ball.y, ball.radius + 3, 0, Math.PI * 2);
+        ctx.strokeStyle = 'rgba(255, 100, 0, 0.5)';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        break;
+        
+      case 'poison':
+        // Poison drip effect
+        ctx.beginPath();
+        ctx.arc(ball.x, ball.y, ball.radius + 3, 0, Math.PI * 2);
+        ctx.strokeStyle = 'rgba(0, 255, 100, 0.4)';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        break;
+        
+      case 'shield':
+        // Shield hexagon glow
+        ctx.beginPath();
+        ctx.arc(ball.x, ball.y, ball.radius + 6, 0, Math.PI * 2);
+        ctx.strokeStyle = 'rgba(100, 200, 255, 0.8)';
+        ctx.lineWidth = 3;
+        ctx.shadowBlur = 8;
+        ctx.shadowColor = '#64c8ff';
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+        break;
+        
+      case 'berserk':
+        // Red rage aura
+        ctx.beginPath();
+        ctx.arc(ball.x, ball.y, ball.radius + 5, 0, Math.PI * 2);
+        ctx.strokeStyle = 'rgba(255, 0, 0, 0.6)';
+        ctx.lineWidth = 2;
+        ctx.shadowBlur = 12;
+        ctx.shadowColor = '#ff0000';
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+        break;
+        
+      case 'ghost':
+        // Make the ball semi-transparent (handled via globalAlpha adjustment)
+        // The actual ball drawing will pick this up
+        break;
+    }
+  }
+  
+  ctx.restore();
+}
+
+function renderActiveZones(ctx, timestamp) {
+  if (!state.activeZones) return;
+  
+  ctx.save();
+  for (const zone of state.activeZones) {
+    const age = timestamp - zone.startTime;
+    const lifeRatio = age / zone.duration;
+    const fadeAlpha = lifeRatio > 0.7 ? (1 - lifeRatio) * 3.33 : 1;
+    
+    if (zone.type === 'freeze') {
+      const pulse = Math.sin(timestamp * 0.005) * 0.1 + 0.9;
+      
+      // Frost circle
+      ctx.beginPath();
+      ctx.arc(zone.x, zone.y, zone.radius * pulse, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(100, 200, 255, ${0.12 * fadeAlpha})`;
+      ctx.fill();
+      ctx.strokeStyle = `rgba(150, 220, 255, ${0.5 * fadeAlpha})`;
+      ctx.lineWidth = 2;
+      ctx.setLineDash([6, 4]);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      
+      // Inner frost pattern
+      ctx.beginPath();
+      ctx.arc(zone.x, zone.y, zone.radius * 0.5 * pulse, 0, Math.PI * 2);
+      ctx.strokeStyle = `rgba(200, 240, 255, ${0.3 * fadeAlpha})`;
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    }
+  }
+  ctx.restore();
+}

@@ -6,6 +6,7 @@
  */
 import { CONFIG } from './config.js';
 import { state } from './state.js';
+import { getFormattedTime } from './ui/match-timer.js';
 
 let mediaRecorder = null;
 let recordedChunks = [];
@@ -161,6 +162,13 @@ export async function startRecording(wrapperEl) {
       recCtx.font = 'bold 22px "Inter", sans-serif';
       recCtx.textAlign = 'center';
       recCtx.fillText(hp2, hp2X + hpWidth / 2 + 10, hpY + hpH / 2 + 1);
+
+      // ── Match Timer ──
+      const timeStr = getFormattedTime();
+      recCtx.font = 'bold 14px "Inter", sans-serif';
+      recCtx.textAlign = 'center';
+      recCtx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+      recCtx.fillText('⏱ ' + timeStr, cw / 2, ch - 15);
     }
 
     animFrameId = requestAnimationFrame(drawFrame);

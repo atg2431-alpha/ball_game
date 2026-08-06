@@ -1,5 +1,6 @@
 import { CONFIG } from '../config.js';
 import { state } from '../state.js';
+import { EVENTS, events } from '../systems/event-bus.js';
 
 let weaponIdCounter = 0;
 
@@ -56,6 +57,8 @@ export function updateWeapons(timestamp) {
           ball.lastFireTime = 0; // For gun
         }
         
+        events.emit(EVENTS.WEAPON_PICKUP, { ball, weaponType: item.type });
+        
         // Remove item from board
         state.spawnedItems.splice(i, 1);
         absorbed = true;
@@ -67,7 +70,6 @@ export function updateWeapons(timestamp) {
   // 2. Handle orbits and combat
   for (let i = 0; i < state.balls.length; i++) {
     const ball = state.balls[i];
-    const enemy = state.balls[1 - i]; // The other ball (assumes 2 balls)
 
     if (ball.weaponExpiry && ball.weaponExpiry > timestamp) {
       // Calculate orbit position
@@ -82,40 +84,46 @@ export function updateWeapons(timestamp) {
       // Update angle on the ball state for the renderer
       ball.weaponAngle = angle;
 
-        if (enemy) {
-          let hit = false;
-          if (ball.weaponType === 'longsword') {
-            // Line segment collision (blade sticks out 40px)
-            const S1x = ball.x + Math.cos(angle) * ball.radius;
-            const S1y = ball.y + Math.sin(angle) * ball.radius;
-            const length = 40;
-            const S2x = ball.x + Math.cos(angle) * (ball.radius + length);
-            const S2y = ball.y + Math.sin(angle) * (ball.radius + length);
-            
-            const L2 = length * length;
-            let t = 0;
-            if (L2 > 0) {
-              t = Math.max(0, Math.min(1, ((enemy.x - S1x) * (S2x - S1x) + (enemy.y - S1y) * (S2y - S1y)) / L2));
-            }
-            const ProjX = S1x + t * (S2x - S1x);
-            const ProjY = S1y + t * (S2y - S1y);
-            const dist = Math.sqrt((enemy.x - ProjX) ** 2 + (enemy.y - ProjY) ** 2);
-            
-            if (dist < enemy.radius + 6) hit = true; // 6 is half-width of blade
-          } else if (ball.weaponType === 'sword') {
-            // Normal point collision
-            const dx = enemy.x - swordX;
-            const dy = enemy.y - swordY;
-            const dist = Math.sqrt(dx * dx + dy * dy);
-            if (dist < enemy.radius + 10) hit = true; // 10 is sword impact radius
-          }
+      for (let j = 0; j < state.balls.length; j++) {
+        if (j === i) continue;
+        const enemy = state.balls[j];
 
-          if (hit) {
+        let hit = false;
+        if (ball.weaponType === 'longsword') {
+          // Line segment collision (blade sticks out 40px)
+          const S1x = ball.x + Math.cos(angle) * ball.radius;
+          const S1y = ball.y + Math.sin(angle) * ball.radius;
+          const length = 40;
+          const S2x = ball.x + Math.cos(angle) * (ball.radius + length);
+          const S2y = ball.y + Math.sin(angle) * (ball.radius + length);
+          
+          const L2 = length * length;
+          let t = 0;
+          if (L2 > 0) {
+            t = Math.max(0, Math.min(1, ((enemy.x - S1x) * (S2x - S1x) + (enemy.y - S1y) * (S2y - S1y)) / L2));
+          }
+          const ProjX = S1x + t * (S2x - S1x);
+          const ProjY = S1y + t * (S2y - S1y);
+          const dist = Math.sqrt((enemy.x - ProjX) ** 2 + (enemy.y - ProjY) ** 2);
+          
+          if (dist < enemy.radius + 6) hit = true; // 6 is half-width of blade
+        } else if (ball.weaponType === 'sword') {
+          // Normal point collision
+          const dx = enemy.x - swordX;
+          const dy = enemy.y - swordY;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < enemy.radius + 10) hit = true; // 10 is sword impact radius
+        }
+
+        if (hit) {
           // Hit! Check invincibility
           if (!enemy.lastHitTime || timestamp - enemy.lastHitTime > CONFIG.weapons.invincibility) {
-            enemy.hp = Math.max(0, enemy.hp - CONFIG.weapons[ball.weaponType].damage);
+            const damage = CONFIG.weapons[ball.weaponType].damage;
+            enemy.hp = Math.max(0, enemy.hp - damage);
             enemy.lastHitTime = timestamp;
             enemy.hpDisplay.value = enemy.hp;
+            
+            events.emit(EVENTS.DAMAGE_DEALT, { source: ball, target: enemy, amount: damage, weaponType: ball.weaponType });
           }
         }
       }
@@ -144,6 +152,7 @@ export function updateWeapons(timestamp) {
     } else if (ball.weaponExpiry && ball.weaponExpiry <= timestamp) {
       // Weapon expired
       ball.weaponExpiry = null;
+      events.emit(EVENTS.WEAPON_EXPIRED, { ball, weaponType: ball.weaponType });
     }
   }
 }
@@ -203,6 +212,8 @@ export function updateProjectiles(timestamp) {
             enemy.hp = Math.max(0, enemy.hp - CONFIG.weapons.gun.damage);
             enemy.lastHitTime = timestamp;
             enemy.hpDisplay.value = enemy.hp;
+            
+            events.emit(EVENTS.PROJECTILE_HIT, { projectile: proj, target: enemy, damage: CONFIG.weapons.gun.damage });
           }
           break; // Stop checking enemies for this bullet
         }

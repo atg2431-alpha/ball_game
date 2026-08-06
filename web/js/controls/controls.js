@@ -14,6 +14,16 @@ import { getBoardDimensions } from '../components/board.js';
 import { hideAimLines, clearAims, setDraggable } from '../input/drag.js';
 import { resetWeapons } from '../physics/weapons.js';
 import { startRecording, stopRecording } from '../recording.js';
+import { resetPowerups } from '../systems/powerup-registry.js';
+import { resetShrinkZone, activateShrinkZone } from '../hazards/shrink-zone.js';
+import { spawnBouncePad } from '../hazards/bounce-pad.js';
+import { startTimer, stopTimer, resetTimer } from '../ui/match-timer.js';
+import { resetHpBars } from '../ui/hp-bar.js';
+import { resetCombo } from '../ui/combo-counter.js';
+import { clearShockwaves } from '../effects/death-explosion.js';
+import { resetFlash } from '../effects/powerup-flash.js';
+import { events, EVENTS } from '../systems/event-bus.js';
+import { setSoundEnabled } from '../systems/sound-hooks.js';
 
 // ─── Velocity Helpers ───────────────────────────────────────
 
@@ -87,6 +97,21 @@ async function startGame(elements) {
   }
 
   state.running = true;
+
+  // Phase 3: Start match timer and emit game start event
+  startTimer();
+  events.emit(EVENTS.GAME_START, {});
+
+  // Phase 2: Activate hazards if enabled
+  if (state.shrinkZoneEnabled) {
+    activateShrinkZone();
+  }
+  if (state.bouncePadsEnabled) {
+    for (let i = 0; i < CONFIG.hazardSpawns.bouncePadCount; i++) {
+      spawnBouncePad();
+    }
+  }
+
   startBtn.textContent = '■';
   startBtn.classList.add('btn--active');
   startBtn.title = 'Stop Simulation';
@@ -109,6 +134,19 @@ function stopGame(elements) {
 
   // Clear any active weapons
   resetWeapons();
+  resetPowerups();
+  resetShrinkZone();
+  state.hazards = [];
+  state.powerupItems = [];
+  state.activeZones = [];
+
+  // Phase 3: Reset visual systems
+  resetHpBars();
+  resetCombo();
+  resetTimer();
+  clearShockwaves();
+  resetFlash();
+  stopTimer();
 
   resetGameState(elements);
 
@@ -188,6 +226,46 @@ export function initSidebar(elements) {
   if (recordToggle) {
     recordToggle.addEventListener('change', (e) => {
       state.recordingEnabled = e.target.checked;
+    });
+  }
+
+  // Phase 2: Power-up Toggle
+  const powerupToggle = document.getElementById('powerup-toggle');
+  if (powerupToggle) {
+    powerupToggle.addEventListener('change', (e) => {
+      state.powerupsEnabled = e.target.checked;
+    });
+  }
+
+  // Phase 2: Shrink Zone Toggle
+  const shrinkToggle = document.getElementById('shrink-toggle');
+  if (shrinkToggle) {
+    shrinkToggle.addEventListener('change', (e) => {
+      state.shrinkZoneEnabled = e.target.checked;
+    });
+  }
+
+  // Phase 2: Gravity Wells Toggle
+  const gravityToggle = document.getElementById('gravity-toggle');
+  if (gravityToggle) {
+    gravityToggle.addEventListener('change', (e) => {
+      state.gravityWellsEnabled = e.target.checked;
+    });
+  }
+
+  // Phase 2: Bounce Pads Toggle
+  const bounceToggle = document.getElementById('bounce-toggle');
+  if (bounceToggle) {
+    bounceToggle.addEventListener('change', (e) => {
+      state.bouncePadsEnabled = e.target.checked;
+    });
+  }
+
+  // Phase 3: Sound Toggle
+  const soundToggle = document.getElementById('sound-toggle');
+  if (soundToggle) {
+    soundToggle.addEventListener('change', (e) => {
+      setSoundEnabled(e.target.checked);
     });
   }
 

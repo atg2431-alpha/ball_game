@@ -23,4 +23,31 @@ export const state = {
   lastSpawnTime: 0,
   projectiles: [],  // { x, y, dx, dy, speed, lifetime, spawnTime, el, ownerId }
   gameSpeed: 1,
+
+  // Phase 1: New system state
+  hazards: [],           // Arena hazards (gravity wells, bounce pads, etc.)
+  activeEffects: [],     // Global active effects (arena shrink, etc.)
+  particles: [],         // Managed by particle system (reference only)
+  arenaState: {
+    shrinking: false,
+    currentRadius: 0,
+    killWallDamage: 2,
+  },
+
+  // Phase 2: Power-ups
+  powerupItems: [],        // Ground power-up items [{ id, x, y, type, radius, spawnTime }]
+  lastPowerupSpawn: 0,
+  powerupsEnabled: false,   // Toggle via UI
+  activeZones: [],          // Active zone effects [{ type, x, y, radius, startTime, duration, ownerId }]
+
+  // Phase 2: Hazards
+  gravityWellsEnabled: false,
+  bouncePadsEnabled: false,
+  shrinkZoneEnabled: false,
+  lastGravityWellSpawn: 0,
+  lastBouncePadSpawn: 0,
+  
+  // Timing
+  simulatedTime: undefined,
+  lastRealTime: undefined,
 };
