@@ -1218,3 +1218,144 @@ input:checked + .slider:before {
     --board-aspect-ratio: 9 / 16;
   }
 }
+
+/* ============================================
+   SIDEBAR SCROLL FIX
+   ============================================ */
+.sidebar-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-height: calc(100vh - 48px);
+  overflow-y: auto;
+  padding-right: 8px; /* Room for scrollbar */
+}
+.sidebar-wrapper::-webkit-scrollbar { width: 6px; }
+.sidebar-wrapper::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.02); border-radius: 4px; }
+.sidebar-wrapper::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 4px; }
+.sidebar-wrapper::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.2); }
+
+/* ============================================
+   THEME: CYBERPUNK NEON
+   ============================================ */
+body.theme-neon {
+  --bg-primary: #04040a;
+  --bg-secondary: #0a0b16;
+  --bg-board: #060710;
+  
+  --border-glow: rgba(0, 255, 255, 0.3);
+  --border-subtle: rgba(0, 255, 255, 0.15);
+  
+  --blue-primary: #00ffff;
+  --blue-glow: rgba(0, 255, 255, 0.6);
+  --blue-bg: rgba(0, 255, 255, 0.1);
+  --blue-border: rgba(0, 255, 255, 0.5);
+
+  --red-primary: #ff007f;
+  --red-glow: rgba(255, 0, 127, 0.6);
+  --red-bg: rgba(255, 0, 127, 0.1);
+  --red-border: rgba(255, 0, 127, 0.5);
+
+  --sidebar-bg: rgba(10, 11, 22, 0.6);
+  --btn-bg: rgba(0, 255, 255, 0.05);
+  
+  --border-radius-lg: 24px;
+  --border-radius-md: 16px;
+  --border-radius-sm: 12px;
+}
+
+body.theme-neon .sidebar {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 0 30px rgba(0, 255, 255, 0.05), inset 0 0 20px rgba(255, 0, 127, 0.05);
+  border: 1px solid var(--border-subtle);
+}
+
+body.theme-neon .btn-weapon.btn-weapon--active,
+body.theme-neon .btn-shape.btn-shape--active {
+  box-shadow: 0 0 15px rgba(0, 255, 255, 0.2);
+}
+
+body.theme-neon .board {
+  box-shadow: 0 0 40px rgba(0, 255, 255, 0.1), inset 0 0 40px rgba(255, 0, 127, 0.05);
+}
+
+body.theme-neon .btn-theme {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-glow);
+  color: var(--blue-primary);
+  text-shadow: 0 0 8px var(--blue-glow);
+}
+
+/* ============================================
+   THEME: TACTILE BRUTALISM
+   ============================================ */
+body.theme-brutalist {
+  --bg-primary: #000000;
+  --bg-secondary: #000000;
+  --bg-board: #050505;
+  
+  --border-glow: #39ff14;
+  --border-subtle: #333333;
+  
+  --blue-primary: #0ff;
+  --blue-glow: rgba(0, 255, 255, 0.8);
+  --blue-bg: transparent;
+  --blue-border: #0ff;
+
+  --red-primary: #39ff14;
+  --red-glow: rgba(57, 255, 20, 0.8);
+  --red-bg: transparent;
+  --red-border: #39ff14;
+
+  --sidebar-bg: #000000;
+  --btn-bg: transparent;
+  
+  --border-radius-lg: 0px;
+  --border-radius-md: 0px;
+  --border-radius-sm: 0px;
+  
+  font-family: 'Outfit', sans-serif;
+  letter-spacing: 0.5px;
+}
+
+body.theme-brutalist .sidebar {
+  border: 1px solid #333;
+  box-shadow: 8px 8px 0px rgba(57, 255, 20, 0.1);
+}
+
+body.theme-brutalist .board {
+  border: 1px solid #333;
+  background-image: 
+    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px) !important;
+  background-size: 40px 40px !important;
+}
+
+body.theme-brutalist .btn-shape,
+body.theme-brutalist .btn-weapon,
+body.theme-brutalist .setting-input {
+  border: 1px solid #333;
+  border-radius: 0;
+}
+
+body.theme-brutalist .btn-shape--active,
+body.theme-brutalist .btn-weapon--active {
+  border-color: #39ff14;
+  background: rgba(57, 255, 20, 0.05);
+}
+
+body.theme-brutalist .stats-card {
+  border-radius: 0;
+  border: 1px solid #333;
+}
+
+body.theme-brutalist .toggle-switch,
+body.theme-brutalist .toggle-switch .slider,
+body.theme-brutalist .toggle-switch .slider::before {
+  border-radius: 0;
+}
+body.theme-brutalist .toggle-switch input:checked + .slider {
+  background-color: #39ff14;
+  box-shadow: none;
+}

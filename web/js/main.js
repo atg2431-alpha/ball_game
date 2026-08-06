@@ -117,23 +117,27 @@ function init() {
   };
 
   // Theme Logic
-  const savedTheme = localStorage.getItem('theme');
-  if (savedTheme === 'light') {
-    document.body.classList.add('light-theme');
-    elements.themeToggleBtn.textContent = '🌙';
+  const themes = ['default', 'neon', 'brutalist'];
+  let currentThemeIdx = 0;
+  
+  const savedTheme = localStorage.getItem('theme') || 'default';
+  currentThemeIdx = themes.indexOf(savedTheme) !== -1 ? themes.indexOf(savedTheme) : 0;
+  
+  function applyTheme(themeName) {
+    document.body.classList.remove('light-theme', 'theme-neon', 'theme-brutalist');
+    if (themeName === 'neon') document.body.classList.add('theme-neon');
+    else if (themeName === 'brutalist') document.body.classList.add('theme-brutalist');
+    
+    const labels = { 'default': '🎨 Default', 'neon': '⚡ Neon', 'brutalist': '⬛ Brutal' };
+    elements.themeToggleBtn.textContent = labels[themeName];
+    localStorage.setItem('theme', themeName);
   }
+  
+  applyTheme(themes[currentThemeIdx]);
 
   elements.themeToggleBtn.addEventListener('click', () => {
-    document.body.classList.toggle('light-theme');
-    const isLight = document.body.classList.contains('light-theme');
-    
-    if (isLight) {
-      localStorage.setItem('theme', 'light');
-      elements.themeToggleBtn.textContent = '🌙';
-    } else {
-      localStorage.setItem('theme', 'dark');
-      elements.themeToggleBtn.textContent = '☀️';
-    }
+    currentThemeIdx = (currentThemeIdx + 1) % themes.length;
+    applyTheme(themes[currentThemeIdx]);
   });
 
   applyBoardImage(elements.boardEl, CONFIG.board.backgroundImage);
