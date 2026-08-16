@@ -17,8 +17,59 @@
   </button>
 
   <div class="main-container">
-    <!-- Sidebar -->
-    <div class="sidebar-wrapper" style="display: flex; flex-direction: column; gap: 16px;">
+    <!-- LEFT COLUMN: Modifiers -->
+    <div class="left-column">
+      <aside class="sidebar modifiers-sidebar">
+        <h3 style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 12px;">⚡ Modifiers</h3>
+        
+        <label class="toggle-container" title="Enable Power-ups">
+          <span class="toggle-label">Power-ups</span>
+          <div class="toggle-switch">
+            <input type="checkbox" id="powerup-toggle">
+            <span class="slider"></span>
+          </div>
+        </label>
+
+        <label class="toggle-container" title="Enable Arena Shrink">
+          <span class="toggle-label">Arena Shrink</span>
+          <div class="toggle-switch">
+            <input type="checkbox" id="shrink-toggle">
+            <span class="slider"></span>
+          </div>
+        </label>
+
+        <label class="toggle-container" title="Enable Gravity Wells">
+          <span class="toggle-label">Gravity Wells</span>
+          <div class="toggle-switch">
+            <input type="checkbox" id="gravity-toggle">
+            <span class="slider"></span>
+          </div>
+        </label>
+
+        <label class="toggle-container" title="Enable Bounce Pads">
+          <span class="toggle-label">Bounce Pads</span>
+          <div class="toggle-switch">
+            <input type="checkbox" id="bounce-toggle">
+            <span class="slider"></span>
+          </div>
+        </label>
+
+        <label class="toggle-container" title="Enable Sound Effects">
+          <span class="toggle-label">Sound FX</span>
+          <div class="toggle-switch">
+            <input type="checkbox" id="sound-toggle">
+            <span class="slider"></span>
+          </div>
+        </label>
+
+        <p class="recording-desc" style="font-size: 0.75rem; color: var(--text-muted); margin-top: 12px; line-height: 1.4;">
+          Toggle game modifiers before starting a match. Power-ups spawn randomly on the arena.
+        </p>
+      </aside>
+    </div>
+
+    <!-- MIDDLE COLUMN: Shape/Weapon + Record + Speed -->
+    <div class="middle-column">
       <aside class="sidebar">
         <div class="sidebar-tabs">
           <button class="btn-tab btn-tab--active" data-target="tab-shape">SHAPE</button>
@@ -91,55 +142,7 @@
           </div>
 
         </div>
-      </aside>
-
-      <!-- PHASE 2: MODIFIERS PANEL -->
-      <aside class="sidebar modifiers-sidebar">
-        <h3 style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 12px;">⚡ Modifiers</h3>
-        
-        <label class="toggle-container" title="Enable Power-ups">
-          <span class="toggle-label">Power-ups</span>
-          <div class="toggle-switch">
-            <input type="checkbox" id="powerup-toggle">
-            <span class="slider"></span>
-          </div>
-        </label>
-
-        <label class="toggle-container" title="Enable Arena Shrink">
-          <span class="toggle-label">Arena Shrink</span>
-          <div class="toggle-switch">
-            <input type="checkbox" id="shrink-toggle">
-            <span class="slider"></span>
-          </div>
-        </label>
-
-        <label class="toggle-container" title="Enable Gravity Wells">
-          <span class="toggle-label">Gravity Wells</span>
-          <div class="toggle-switch">
-            <input type="checkbox" id="gravity-toggle">
-            <span class="slider"></span>
-          </div>
-        </label>
-
-        <label class="toggle-container" title="Enable Bounce Pads">
-          <span class="toggle-label">Bounce Pads</span>
-          <div class="toggle-switch">
-            <input type="checkbox" id="bounce-toggle">
-            <span class="slider"></span>
-          </div>
-        </label>
-
-        <label class="toggle-container" title="Enable Sound Effects">
-          <span class="toggle-label">Sound FX</span>
-          <div class="toggle-switch">
-            <input type="checkbox" id="sound-toggle">
-            <span class="slider"></span>
-          </div>
-        </label>
-
-        <p class="recording-desc" style="font-size: 0.75rem; color: var(--text-muted); margin-top: 12px; line-height: 1.4;">
-          Toggle game modifiers before starting a match. Power-ups spawn randomly on the arena.
-        </p>
+      </div>
       </aside>
 
       <!-- RECORDING PANEL -->
@@ -157,56 +160,63 @@
           </p>
         </div>
       </aside>
-    </div>
 
-    <div class="game-wrapper">
-    <h1 class="game-title">Ball Battle Simulator</h1>
-
-    <!-- Player Labels -->
-    <div class="player-labels">
-      <div class="player-label player-label--blue">
-        <span class="player-label__name">Player 1</span>
-      </div>
-      <div class="versus-badge">VS</div>
-      <div class="player-label player-label--red">
-        <span class="player-label__name">Player 2</span>
-      </div>
-    </div>
-
-    <!-- Board + Controls -->
-    <div class="board-container">
-      <!-- Game Board / Arena -->
-    <div class="board" id="game-board">
-      <!-- Board background image can be set via CSS or JS later -->
-      <div class="board__inner">
-        <canvas id="game-canvas"></canvas>
-      </div>
-    </div>
-
-      <!-- Controls -->
-      <div class="controls">
-        <div class="speed-controls" id="speed-controls">
+      <!-- SPEED PANEL -->
+      <aside class="sidebar speed-sidebar">
+        <h3 style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 12px;">🏎️ Speed</h3>
+        <div class="speed-controls-panel" id="speed-controls">
           <button class="btn-speed active" data-speed="1">1x</button>
           <button class="btn-speed" data-speed="2">2x</button>
           <button class="btn-speed" data-speed="4">4x</button>
         </div>
-        <button class="btn-start" id="start-btn" title="Start Simulation">▶</button>
-      </div>
+      </aside>
     </div>
 
-    <!-- Stats Bar -->
-    <div class="stats-bar">
-      <div class="stats-card stats-card--blue">
-        <span class="stats-card__label">HP</span>
-        <input type="number" class="stats-card__input stats-card__value--blue" id="ball-1-hp" value="100" min="0" step="1">
-      </div>
-      <div class="stats-card stats-card--red">
-        <span class="stats-card__label">HP</span>
-        <input type="number" class="stats-card__input stats-card__value--red" id="ball-2-hp" value="100" min="0" step="1">
+    <!-- RIGHT COLUMN: Game Board -->
+    <div class="right-column">
+      <div class="game-wrapper">
+        <h1 class="game-title">Ball Battle Simulator</h1>
+
+        <!-- Player Labels -->
+        <div class="player-labels">
+          <div class="player-label player-label--blue">
+            <span class="player-label__name">Player 1</span>
+          </div>
+          <div class="versus-badge">VS</div>
+          <div class="player-label player-label--red">
+            <span class="player-label__name">Player 2</span>
+          </div>
+        </div>
+
+        <!-- Board + Play Button -->
+        <div class="board-container">
+          <!-- Game Board / Arena -->
+          <div class="board" id="game-board">
+            <!-- Board background image can be set via CSS or JS later -->
+            <div class="board__inner">
+              <canvas id="game-canvas"></canvas>
+            </div>
+          </div>
+
+          <!-- Play Button -->
+          <button class="btn-start" id="start-btn" title="Start Simulation">▶</button>
+        </div>
+
+        <!-- Stats Bar -->
+        <div class="stats-bar">
+          <div class="stats-card stats-card--blue">
+            <span class="stats-card__label">HP</span>
+            <input type="number" class="stats-card__input stats-card__value--blue" id="ball-1-hp" value="100" min="0" step="1">
+          </div>
+          <div class="stats-card stats-card--red">
+            <span class="stats-card__label">HP</span>
+            <input type="number" class="stats-card__input stats-card__value--red" id="ball-2-hp" value="100" min="0" step="1">
+          </div>
+        </div>
+        <!-- Error Display -->
+        <div id="error-log" style="color: red; background: #222; padding: 10px; width: 100%; font-family: monospace; z-index: 100; position: absolute; top: 0; left: 0; display: none;"></div>
       </div>
     </div>
-    <!-- Error Display -->
-    <div id="error-log" style="color: red; background: #222; padding: 10px; width: 100%; font-family: monospace; z-index: 100; position: absolute; top: 0; left: 0; display: none;"></div>
   </div>
 
   <!-- Game Over Screen -->
