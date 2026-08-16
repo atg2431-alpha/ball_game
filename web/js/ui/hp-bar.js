@@ -147,18 +147,7 @@ export function renderHpBars(ctx, balls, canvasWidth, canvasHeight) {
       ctx.fill();
     }
     
-    // HP text
-    ctx.font = 'bold 10px "Outfit", sans-serif';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillStyle = '#ffffff';
-    ctx.fillText(`${Math.max(0, Math.round(ball.hp))} / ${maxHp}`, barX + barWidth / 2, barY + barHeight / 2);
-    
-    // Player name label
-    ctx.font = '9px "Outfit", sans-serif';
-    ctx.textAlign = isBlue ? 'left' : 'right';
-    ctx.fillStyle = isBlue ? '#60a5fa' : '#f87171';
-    ctx.fillText(ball.name || (isBlue ? 'P1' : 'P2'), isBlue ? barX : barX + barWidth, barY - 6);
+    // Player name label and HP text removed as per user request
   }
   
   ctx.restore();
