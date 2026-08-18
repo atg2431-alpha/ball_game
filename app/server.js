@@ -5,15 +5,15 @@ const path = require('path');
 const app = express();
 const PORT = 3000;
 
-// Middleware to parse raw binary data (WebM video)
+// Middleware to parse raw binary data (MP4 video)
 // We set a high limit because videos can be large
-app.use(express.raw({ type: 'video/webm', limit: '500mb' }));
+app.use(express.raw({ type: ['video/webm', 'video/mp4'], limit: '500mb' }));
 
 // Serve the 'web' directory statically
 app.use(express.static(path.join(__dirname, '../web')));
 
 // Ensure video_files directory exists
-const videoDir = path.join(__dirname, '../video_files');
+const videoDir = path.join(__dirname, '../video_files_mp4');
 if (!fs.existsSync(videoDir)) {
   fs.mkdirSync(videoDir);
 }
@@ -24,7 +24,7 @@ app.post('/api/upload-recording', (req, res) => {
     return res.status(400).send('No video data received');
   }
 
-  const filename = req.query.filename || `recording_${Date.now()}.webm`;
+  const filename = req.query.filename || `recording_${Date.now()}.mp4`;
   const filePath = path.join(videoDir, filename);
 
   fs.writeFile(filePath, req.body, (err) => {

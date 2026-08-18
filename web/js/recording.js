@@ -215,13 +215,13 @@ export function stopRecording(player1Name, player2Name) {
 
     const now = new Date();
     const timeStr = `${now.getHours()}-${now.getMinutes()}-${now.getSeconds()}`;
-    const filename = `${player1Name}vs${player2Name}_${timeStr}.webm`;
+    const filename = `${player1Name}vs${player2Name}_${timeStr}.mp4`;
     
     try {
       console.log('Uploading recording...');
       const response = await fetch(`/api/upload-recording?filename=${encodeURIComponent(filename)}`, {
         method: 'POST',
-        headers: { 'Content-Type': 'video/webm' },
+        headers: { 'Content-Type': 'video/mp4' },
         body: blob
       });
       

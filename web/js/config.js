@@ -67,7 +67,7 @@ export const CONFIG = {
   recording: {
     fps: 60,                     // Frames per second for the recording
     videoBitsPerSecond: 8000000, // Video bitrate (8 Mbps for high quality)
-    mimeType: 'video/webm',
+    mimeType: 'video/mp4',
   },
 
   // ─── Phase 1: Extended Physics ─────────────────────────────
