@@ -1,7 +1,12 @@
 /**
- * Screen Recording Logic
- * Creates a hidden "recording canvas" that composites the full game-wrapper UI:
- *   Title, Player Labels, Game Board (from game canvas), HP Bars.
+ * Screen Recording Logic — Instagram Reels Optimized (9:16 Portrait)
+ *
+ * Creates a hidden "recording canvas" at a fixed 1080×1920 resolution
+ * and composites the full game UI with Instagram-safe padding zones:
+ *   - Top ~120px reserved for IG header (username, follow)
+ *   - Bottom ~160px reserved for IG footer (likes, comments, share)
+ *   - All key content drawn within the safe zone
+ *
  * Records via captureStream() — zero lag, zero browser prompts.
  */
 import { CONFIG } from './config.js';
@@ -24,156 +29,271 @@ export async function startRecording(wrapperEl) {
       return false;
     }
 
-    // 1. Measure the game-wrapper to size our recording canvas
-    const wrapperRect = wrapperEl.getBoundingClientRect();
-    const W = Math.round(wrapperRect.width);
-    const H = Math.round(wrapperRect.height);
+    // 1. Fixed 9:16 recording canvas (Instagram Reels)
+    const W = CONFIG.recording.canvasWidth;   // 1080
+    const H = CONFIG.recording.canvasHeight;  // 1920
 
-    // 2. Create hidden recording canvas
     recCanvas = document.createElement('canvas');
-    recCanvas.width = W * 2;  // 2x for sharpness
-    recCanvas.height = H * 2;
+    recCanvas.width = W;
+    recCanvas.height = H;
     recCtx = recCanvas.getContext('2d');
-    recCtx.scale(2, 2);
 
     isRecording = true;
 
-    // 3. Composite loop
+    // ──────────────────────────────────────────────
+    // Layout constants (all in pixels at 1080×1920)
+    // ──────────────────────────────────────────────
+    const PAD_X = 40;                    // Horizontal padding from edges
+    const CONTENT_W = W - PAD_X * 2;     // 1000px usable width
+
+    // Instagram safe zones
+    const IG_HEADER = 120;               // IG username/follow bar
+
+    // Title
+    const TITLE_Y = IG_HEADER + 45;      // 165px — just below IG header
+    const TITLE_FONT = 'bold 42px "Outfit", "Inter", sans-serif';
+
+    // Player labels
+    const LABEL_Y = TITLE_Y + 50;        // 215px
+    const LABEL_H = 52;
+    const LABEL_GAP = 14;
+    const VS_WIDTH = 40;
+    const LABEL_W = (CONTENT_W - VS_WIDTH - LABEL_GAP * 2) / 2;
+    const LABEL_FONT = 'bold 24px "Outfit", "Inter", sans-serif';
+
+    // Game board area
+    const BOARD_Y = LABEL_Y + LABEL_H + 30;  // ~297px
+    const BOARD_X = PAD_X;
+    const BOARD_W = CONTENT_W;               // 1000px
+    const BOARD_H = BOARD_W * (5 / 4);       // 4:5 ratio = 1250px
+    const BOARD_R = 24;                      // Corner radius
+
+    // HP bars (green animated bars)
+    const HP_BAR_Y = BOARD_Y + BOARD_H + 35;  // ~1582px
+    const HP_BAR_H = 18;
+    const HP_BAR_GAP = 30;
+    const HP_BAR_W = (CONTENT_W - HP_BAR_GAP) / 2;
+    const HP_BAR_R = 9;
+
+    // HP value cards
+    const HP_CARD_Y = HP_BAR_Y + HP_BAR_H + 20;  // ~1620px
+    const HP_CARD_H = 56;
+    const HP_CARD_GAP = 16;
+    const HP_CARD_W = (CONTENT_W - HP_CARD_GAP) / 2;
+    const HP_CARD_R = 14;
+
+    // Match timer
+    const TIMER_Y = HP_CARD_Y + HP_CARD_H + 30;  // ~1726px (well above IG footer at 1760)
+
+    // 2. Composite loop
     function drawFrame() {
       if (!isRecording) return;
       animFrameId = requestAnimationFrame(drawFrame);
 
-      const wr = wrapperEl.getBoundingClientRect();
-      const cw = wr.width;
-      const ch = wr.height;
+      // ── Background ──
+      recCtx.fillStyle = '#0a0a0f';
+      recCtx.fillRect(0, 0, W, H);
 
-      // Background
-      recCtx.fillStyle = '#0f0a1a';
-      recCtx.fillRect(0, 0, cw, ch);
+      // Subtle gradient overlay (like the game background)
+      const bgGrad1 = recCtx.createRadialGradient(W * 0.2, H * 0.3, 0, W * 0.2, H * 0.3, 600);
+      bgGrad1.addColorStop(0, 'rgba(74, 158, 255, 0.06)');
+      bgGrad1.addColorStop(1, 'transparent');
+      recCtx.fillStyle = bgGrad1;
+      recCtx.fillRect(0, 0, W, H);
+
+      const bgGrad2 = recCtx.createRadialGradient(W * 0.8, H * 0.7, 0, W * 0.8, H * 0.7, 600);
+      bgGrad2.addColorStop(0, 'rgba(255, 74, 106, 0.06)');
+      bgGrad2.addColorStop(1, 'transparent');
+      recCtx.fillStyle = bgGrad2;
+      recCtx.fillRect(0, 0, W, H);
 
       // ── Title ──
-      const titleY = 28;
-      const gradient = recCtx.createLinearGradient(cw * 0.3, 0, cw * 0.7, 0);
-      gradient.addColorStop(0, '#3b82f6');
-      gradient.addColorStop(0.5, '#a855f7');
-      gradient.addColorStop(1, '#ef4444');
-      recCtx.fillStyle = gradient;
-      recCtx.font = 'bold 22px "Inter", sans-serif';
+      const titleGrad = recCtx.createLinearGradient(W * 0.25, 0, W * 0.75, 0);
+      titleGrad.addColorStop(0, '#4a9eff');
+      titleGrad.addColorStop(0.5, '#a855f7');
+      titleGrad.addColorStop(1, '#ff4a6a');
+      recCtx.fillStyle = titleGrad;
+      recCtx.font = TITLE_FONT;
       recCtx.textAlign = 'center';
       recCtx.textBaseline = 'middle';
-      recCtx.fillText('BALL BATTLE SIMULATOR', cw / 2, titleY);
+      recCtx.fillText('BALL BATTLE SIMULATOR', W / 2, TITLE_Y);
 
       // ── Player Labels ──
-      const labelY = 62;
-      const labelH = 38;
-      const labelGap = 12;
-      const vsWidth = 30;
-      const labelWidth = (cw - vsWidth - labelGap * 4 - 40) / 2; // 40px total padding
-      const labelStartX = 20;
+      const p1X = PAD_X;
+      const p2X = PAD_X + LABEL_W + LABEL_GAP + VS_WIDTH + LABEL_GAP;
 
-      // Player 1 label (blue)
-      drawRoundedRect(recCtx, labelStartX, labelY, labelWidth, labelH, 8);
-      recCtx.fillStyle = 'rgba(59, 130, 246, 0.15)';
+      // Player 1 (Blue)
+      drawRoundedRect(recCtx, p1X, LABEL_Y, LABEL_W, LABEL_H, 10);
+      recCtx.fillStyle = 'rgba(74, 158, 255, 0.12)';
       recCtx.fill();
-      recCtx.strokeStyle = '#3b82f6';
+      recCtx.strokeStyle = 'rgba(74, 158, 255, 0.4)';
       recCtx.lineWidth = 1.5;
       recCtx.stroke();
-      recCtx.fillStyle = '#60a5fa';
-      recCtx.font = 'bold 14px "Inter", sans-serif';
+      recCtx.fillStyle = '#4a9eff';
+      recCtx.font = LABEL_FONT;
       recCtx.textAlign = 'center';
-      recCtx.fillText(CONFIG.ball1.name, labelStartX + labelWidth / 2, labelY + labelH / 2);
+      recCtx.textBaseline = 'middle';
+      recCtx.fillText(CONFIG.ball1.name, p1X + LABEL_W / 2, LABEL_Y + LABEL_H / 2);
 
       // VS badge
-      const vsX = labelStartX + labelWidth + labelGap;
-      recCtx.fillStyle = 'rgba(255,255,255,0.5)';
-      recCtx.font = 'bold 12px "Inter", sans-serif';
-      recCtx.fillText('VS', vsX + vsWidth / 2, labelY + labelH / 2);
+      const vsX = PAD_X + LABEL_W + LABEL_GAP;
+      recCtx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+      recCtx.font = 'bold 18px "Outfit", "Inter", sans-serif';
+      recCtx.textAlign = 'center';
+      recCtx.textBaseline = 'middle';
+      recCtx.fillText('VS', vsX + VS_WIDTH / 2, LABEL_Y + LABEL_H / 2);
 
-      // Player 2 label (red)
-      const p2X = vsX + vsWidth + labelGap;
-      drawRoundedRect(recCtx, p2X, labelY, labelWidth, labelH, 8);
-      recCtx.fillStyle = 'rgba(239, 68, 68, 0.15)';
+      // Player 2 (Red)
+      drawRoundedRect(recCtx, p2X, LABEL_Y, LABEL_W, LABEL_H, 10);
+      recCtx.fillStyle = 'rgba(255, 74, 106, 0.12)';
       recCtx.fill();
-      recCtx.strokeStyle = '#ef4444';
+      recCtx.strokeStyle = 'rgba(255, 74, 106, 0.4)';
       recCtx.lineWidth = 1.5;
       recCtx.stroke();
-      recCtx.fillStyle = '#f87171';
-      recCtx.font = 'bold 14px "Inter", sans-serif';
-      recCtx.fillText(CONFIG.ball2.name, p2X + labelWidth / 2, labelY + labelH / 2);
+      recCtx.fillStyle = '#ff4a6a';
+      recCtx.font = LABEL_FONT;
+      recCtx.textAlign = 'center';
+      recCtx.textBaseline = 'middle';
+      recCtx.fillText(CONFIG.ball2.name, p2X + LABEL_W / 2, LABEL_Y + LABEL_H / 2);
 
       // ── Game Board ──
-      const boardEl = document.getElementById('game-board');
-      const boardRect = boardEl.getBoundingClientRect();
-      const bx = boardRect.left - wr.left;
-      const by = boardRect.top - wr.top;
-      const bw = boardRect.width;
-      const bh = boardRect.height;
-
-      // Board background
-      drawRoundedRect(recCtx, bx, by, bw, bh, 16);
-      recCtx.fillStyle = 'rgba(15, 10, 30, 0.8)';
+      // Board background with border
+      drawRoundedRect(recCtx, BOARD_X, BOARD_Y, BOARD_W, BOARD_H, BOARD_R);
+      recCtx.fillStyle = 'rgba(13, 13, 20, 0.9)';
       recCtx.fill();
-      recCtx.strokeStyle = 'rgba(139, 92, 246, 0.3)';
+      recCtx.strokeStyle = 'rgba(120, 80, 255, 0.25)';
       recCtx.lineWidth = 2;
       recCtx.stroke();
 
-      // Copy the live game canvas into the board area
-      const gcRect = gameCanvas.getBoundingClientRect();
-      const gx = gcRect.left - wr.left;
-      const gy = gcRect.top - wr.top;
-      recCtx.drawImage(gameCanvas, gx, gy, gcRect.width, gcRect.height);
+      // Corner accent glows on the board
+      recCtx.save();
+      recCtx.beginPath();
+      drawRoundedRect(recCtx, BOARD_X, BOARD_Y, BOARD_W, BOARD_H, BOARD_R);
+      recCtx.clip();
+      
+      const cornerGrad1 = recCtx.createRadialGradient(BOARD_X, BOARD_Y, 0, BOARD_X, BOARD_Y, BOARD_W * 0.4);
+      cornerGrad1.addColorStop(0, 'rgba(74, 158, 255, 0.08)');
+      cornerGrad1.addColorStop(1, 'transparent');
+      recCtx.fillStyle = cornerGrad1;
+      recCtx.fillRect(BOARD_X, BOARD_Y, BOARD_W, BOARD_H);
 
-      // ── HP Bars ──
-      const hpY = ch - 55;
-      const hpH = 42;
-      const hpWidth = (cw - 60) / 2;
+      const cornerGrad2 = recCtx.createRadialGradient(BOARD_X + BOARD_W, BOARD_Y + BOARD_H, 0, BOARD_X + BOARD_W, BOARD_Y + BOARD_H, BOARD_W * 0.4);
+      cornerGrad2.addColorStop(0, 'rgba(255, 74, 106, 0.08)');
+      cornerGrad2.addColorStop(1, 'transparent');
+      recCtx.fillStyle = cornerGrad2;
+      recCtx.fillRect(BOARD_X, BOARD_Y, BOARD_W, BOARD_H);
+      recCtx.restore();
 
-      // Player 1 HP
-      const hp1 = state.balls.length > 0 ? Math.max(0, Math.round(state.balls[0].hp)) : CONFIG.ball1.hp;
-      drawRoundedRect(recCtx, 20, hpY, hpWidth, hpH, 12);
-      recCtx.fillStyle = 'rgba(30, 25, 50, 0.9)';
+      // Draw the live game canvas into the board area
+      recCtx.save();
+      recCtx.beginPath();
+      drawRoundedRect(recCtx, BOARD_X, BOARD_Y, BOARD_W, BOARD_H, BOARD_R);
+      recCtx.clip();
+      recCtx.drawImage(gameCanvas, BOARD_X, BOARD_Y, BOARD_W, BOARD_H);
+      recCtx.restore();
+
+      // ── HP Bars (green animated bars) ──
+      const hp1 = state.balls.length > 0 ? Math.max(0, state.balls[0].hp) : CONFIG.ball1.hp;
+      const hp2 = state.balls.length > 1 ? Math.max(0, state.balls[1].hp) : CONFIG.ball2.hp;
+      const maxHp1 = state.balls.length > 0 ? (state.balls[0].maxHp || CONFIG.ball1.hp) : CONFIG.ball1.hp;
+      const maxHp2 = state.balls.length > 1 ? (state.balls[1].maxHp || CONFIG.ball2.hp) : CONFIG.ball2.hp;
+      const hp1Pct = Math.max(0, hp1 / maxHp1);
+      const hp2Pct = Math.max(0, hp2 / maxHp2);
+
+      // HP bar colors based on percentage
+      function getHpColor(pct) {
+        if (pct > 0.6) return '#22c55e';
+        if (pct > 0.4) return '#eab308';
+        if (pct > 0.2) return '#f97316';
+        return '#ef4444';
+      }
+
+      // Player 1 HP bar
+      const hpBar1X = PAD_X;
+      drawRoundedRect(recCtx, hpBar1X, HP_BAR_Y, HP_BAR_W, HP_BAR_H, HP_BAR_R);
+      recCtx.fillStyle = 'rgba(20, 20, 30, 0.8)';
       recCtx.fill();
-      recCtx.strokeStyle = 'rgba(59, 130, 246, 0.3)';
+      recCtx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
       recCtx.lineWidth = 1;
       recCtx.stroke();
-      recCtx.fillStyle = 'rgba(255,255,255,0.4)';
-      recCtx.font = '12px "Inter", sans-serif';
-      recCtx.textAlign = 'left';
-      recCtx.fillText('HP', 36, hpY + hpH / 2);
-      recCtx.fillStyle = '#60a5fa';
-      recCtx.font = 'bold 22px "Inter", sans-serif';
-      recCtx.textAlign = 'center';
-      recCtx.fillText(hp1, 20 + hpWidth / 2 + 10, hpY + hpH / 2 + 1);
+      // Fill
+      const fill1W = Math.max(0, hp1Pct * (HP_BAR_W - 4));
+      if (fill1W > 0) {
+        drawRoundedRect(recCtx, hpBar1X + 2, HP_BAR_Y + 2, fill1W, HP_BAR_H - 4, HP_BAR_R - 2);
+        recCtx.fillStyle = getHpColor(hp1Pct);
+        recCtx.fill();
+      }
 
-      // Player 2 HP
-      const hp2 = state.balls.length > 1 ? Math.max(0, Math.round(state.balls[1].hp)) : CONFIG.ball2.hp;
-      const hp2X = cw - 20 - hpWidth;
-      drawRoundedRect(recCtx, hp2X, hpY, hpWidth, hpH, 12);
-      recCtx.fillStyle = 'rgba(30, 25, 50, 0.9)';
+      // Player 2 HP bar
+      const hpBar2X = PAD_X + HP_BAR_W + HP_BAR_GAP;
+      drawRoundedRect(recCtx, hpBar2X, HP_BAR_Y, HP_BAR_W, HP_BAR_H, HP_BAR_R);
+      recCtx.fillStyle = 'rgba(20, 20, 30, 0.8)';
       recCtx.fill();
-      recCtx.strokeStyle = 'rgba(239, 68, 68, 0.3)';
+      recCtx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
       recCtx.lineWidth = 1;
       recCtx.stroke();
-      recCtx.fillStyle = 'rgba(255,255,255,0.4)';
-      recCtx.font = '12px "Inter", sans-serif';
+      // Fill
+      const fill2W = Math.max(0, hp2Pct * (HP_BAR_W - 4));
+      if (fill2W > 0) {
+        drawRoundedRect(recCtx, hpBar2X + 2, HP_BAR_Y + 2, fill2W, HP_BAR_H - 4, HP_BAR_R - 2);
+        recCtx.fillStyle = getHpColor(hp2Pct);
+        recCtx.fill();
+      }
+
+      // ── HP Value Cards ──
+      const hpCard1X = PAD_X;
+      const hpCard2X = PAD_X + HP_CARD_W + HP_CARD_GAP;
+
+      // Player 1 card
+      drawRoundedRect(recCtx, hpCard1X, HP_CARD_Y, HP_CARD_W, HP_CARD_H, HP_CARD_R);
+      recCtx.fillStyle = 'rgba(18, 18, 26, 0.9)';
+      recCtx.fill();
+      recCtx.strokeStyle = 'rgba(74, 158, 255, 0.25)';
+      recCtx.lineWidth = 1;
+      recCtx.stroke();
+      // Label
+      recCtx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+      recCtx.font = '18px "Outfit", "Inter", sans-serif';
       recCtx.textAlign = 'left';
-      recCtx.fillText('HP', hp2X + 16, hpY + hpH / 2);
-      recCtx.fillStyle = '#f87171';
-      recCtx.font = 'bold 22px "Inter", sans-serif';
+      recCtx.textBaseline = 'middle';
+      recCtx.fillText('HP', hpCard1X + 20, HP_CARD_Y + HP_CARD_H / 2);
+      // Value
+      recCtx.fillStyle = '#4a9eff';
+      recCtx.font = 'bold 32px "Outfit", "Inter", sans-serif';
       recCtx.textAlign = 'center';
-      recCtx.fillText(hp2, hp2X + hpWidth / 2 + 10, hpY + hpH / 2 + 1);
+      recCtx.fillText(Math.round(hp1), hpCard1X + HP_CARD_W / 2 + 15, HP_CARD_Y + HP_CARD_H / 2);
+
+      // Player 2 card
+      drawRoundedRect(recCtx, hpCard2X, HP_CARD_Y, HP_CARD_W, HP_CARD_H, HP_CARD_R);
+      recCtx.fillStyle = 'rgba(18, 18, 26, 0.9)';
+      recCtx.fill();
+      recCtx.strokeStyle = 'rgba(255, 74, 106, 0.25)';
+      recCtx.lineWidth = 1;
+      recCtx.stroke();
+      // Label
+      recCtx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+      recCtx.font = '18px "Outfit", "Inter", sans-serif';
+      recCtx.textAlign = 'left';
+      recCtx.textBaseline = 'middle';
+      recCtx.fillText('HP', hpCard2X + 20, HP_CARD_Y + HP_CARD_H / 2);
+      // Value
+      recCtx.fillStyle = '#ff4a6a';
+      recCtx.font = 'bold 32px "Outfit", "Inter", sans-serif';
+      recCtx.textAlign = 'center';
+      recCtx.fillText(Math.round(hp2), hpCard2X + HP_CARD_W / 2 + 15, HP_CARD_Y + HP_CARD_H / 2);
 
       // ── Match Timer ──
       const timeStr = getFormattedTime();
-      recCtx.font = 'bold 14px "Inter", sans-serif';
+      recCtx.font = 'bold 22px "Outfit", "Inter", sans-serif';
       recCtx.textAlign = 'center';
-      recCtx.fillStyle = 'rgba(255, 255, 255, 0.6)';
-      recCtx.fillText('⏱ ' + timeStr, cw / 2, ch - 15);
+      recCtx.textBaseline = 'middle';
+      recCtx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+      recCtx.fillText('\u23F1 ' + timeStr, W / 2, TIMER_Y);
     }
 
     animFrameId = requestAnimationFrame(drawFrame);
 
-    // 4. Start MediaRecorder on the recording canvas stream
+    // 3. Start MediaRecorder on the recording canvas stream
     stream = recCanvas.captureStream(CONFIG.recording.fps);
     mediaRecorder = new MediaRecorder(stream, { 
       mimeType: CONFIG.recording.mimeType,
@@ -252,3 +372,4 @@ function drawRoundedRect(ctx, x, y, w, h, r) {
   ctx.quadraticCurveTo(x, y, x + r, y);
   ctx.closePath();
 }
+

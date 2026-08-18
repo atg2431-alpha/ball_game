@@ -68,6 +68,9 @@ export const CONFIG = {
     fps: 60,                     // Frames per second for the recording
     videoBitsPerSecond: 8000000, // Video bitrate (8 Mbps for high quality)
     mimeType: 'video/mp4',
+    // Instagram Reels 9:16 portrait
+    canvasWidth: 1080,
+    canvasHeight: 1920,
   },
 
   // ─── Phase 1: Extended Physics ─────────────────────────────
