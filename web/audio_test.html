@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head><title>Audio Test</title></head>
+<body style="background:#1a1a2e;color:#fff;font-family:sans-serif;padding:40px;">
+<h1>🔊 Audio Test Page</h1>
+<p>Open this at <b>http://localhost:3000/audio_test.html</b></p>
+<p>Click buttons below — if you hear sounds, the audio system works.</p>
+<div id="results" style="background:#222;padding:16px;border-radius:8px;margin:20px 0;white-space:pre-wrap;font-family:monospace;font-size:14px;max-height:400px;overflow:auto;"></div>
+<div id="buttons"></div>
+<script>
+const log = (msg) => {
+  const el = document.getElementById('results');
+  el.textContent += msg + '\n';
+  el.scrollTop = el.scrollHeight;
+  console.log(msg);
+};
+
+const files = [
+  'ball_collision.wav', 'wall_bounce.wav', 'slash_hit.wav', 'gunshot.wav',
+  'explosion.wav', 'weapon_pickup.wav', 'weapon_expired.wav', 'powerup_spawn.wav',
+  'powerup_pickup.wav', 'status_applied.wav', 'power_down.wav', 'arena_shrink.wav',
+  'hazard_trigger.wav', 'game_start.wav', 'game_over.wav', 'ui_click.wav'
+];
+
+let ctx = null;
+const buffers = {};
+
+async function init() {
+  log('Creating AudioContext...');
+  ctx = new (window.AudioContext || window.webkitAudioContext)();
+  log(`AudioContext state: ${ctx.state}`);
+  
+  if (ctx.state === 'suspended') {
+    await ctx.resume();
+    log(`AudioContext resumed: ${ctx.state}`);
+  }
+
+  log('\nLoading audio files from utils/audio/...\n');
+  
+  for (const file of files) {
+    const url = 'utils/audio/' + file;
+    try {
+      const resp = await fetch(url);
+      if (!resp.ok) {
+        log(`❌ ${file} — HTTP ${resp.status} ${resp.statusText}`);
+        continue;
+      }
+      const arrayBuf = await resp.arrayBuffer();
+      log(`📥 ${file} — ${arrayBuf.byteLength} bytes fetched`);
+      
+      const audioBuf = await ctx.decodeAudioData(arrayBuf);
+      buffers[file] = audioBuf;
+      log(`✅ ${file} — decoded (${audioBuf.duration.toFixed(2)}s, ${audioBuf.sampleRate}Hz)`);
+    } catch (err) {
+      log(`❌ ${file} — ERROR: ${err.message}`);
+    }
+  }
+  
+  log(`\n🎉 Loaded ${Object.keys(buffers).length}/${files.length} sounds\n`);
+  
+  // Create play buttons
+  const container = document.getElementById('buttons');
+  for (const file of files) {
+    const btn = document.createElement('button');
+    btn.textContent = `▶ ${file.replace('.wav','')}`;
+    btn.style.cssText = 'background:#a855f7;color:#fff;border:none;padding:10px 16px;margin:4px;border-radius:6px;cursor:pointer;font-size:14px;';
+    btn.onclick = () => playSound(file);
+    container.appendChild(btn);
+  }
+}
+
+function playSound(file) {
+  if (!buffers[file]) {
+    log(`⚠️ ${file} not loaded`);
+    return;
+  }
+  const source = ctx.createBufferSource();
+  source.buffer = buffers[file];
+  const gain = ctx.createGain();
+  gain.gain.value = 0.7;
+  source.connect(gain);
+  gain.connect(ctx.destination);
+  source.start(0);
+  log(`🔊 Playing: ${file}`);
+}
+
+// Start on first click (to satisfy browser autoplay policy)
+document.body.addEventListener('click', () => {
+  if (!ctx) init();
+}, { once: true });
+
+log('👆 Click anywhere to initialize audio...');
+</script>
+</body>
+</html>

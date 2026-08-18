@@ -23,7 +23,7 @@ import { resetCombo } from '../ui/combo-counter.js';
 import { clearShockwaves } from '../effects/death-explosion.js';
 import { resetFlash } from '../effects/powerup-flash.js';
 import { events, EVENTS } from '../systems/event-bus.js';
-import { setSoundEnabled } from '../systems/sound-hooks.js';
+import { setSoundEnabled, stopLoopingSound, playUIClick } from '../systems/sound-hooks.js';
 
 // ─── Velocity Helpers ───────────────────────────────────────
 
@@ -146,6 +146,7 @@ function stopGame(elements) {
   resetTimer();
   clearShockwaves();
   resetFlash();
+  stopLoopingSound('arena_shrink');
   stopTimer();
 
   resetGameState(elements);
@@ -167,6 +168,7 @@ export function initControls(elements) {
   resetGameState(elements);
 
   startBtn.addEventListener('click', () => {
+    playUIClick();
     if (state.running) {
       stopGame(elements);
     } else {
@@ -185,6 +187,7 @@ export function initSidebar(elements) {
 
   tabBtns.forEach(btn => {
     btn.addEventListener('click', () => {
+      playUIClick();
       // Remove active from all
       tabBtns.forEach(b => b.classList.remove('active'));
       tabContents.forEach(c => c.classList.remove('active'));
@@ -201,6 +204,7 @@ export function initSidebar(elements) {
   const settingToggles = document.querySelectorAll('.btn-settings-toggle');
   settingToggles.forEach(btn => {
     btn.addEventListener('click', () => {
+      playUIClick();
       const targetId = btn.dataset.target;
       const targetSettings = document.getElementById(targetId);
       if (targetSettings) {
@@ -215,6 +219,7 @@ export function initSidebar(elements) {
   const speedBtns = document.querySelectorAll('.btn-speed');
   speedBtns.forEach(btn => {
     btn.addEventListener('click', (e) => {
+      playUIClick();
       speedBtns.forEach(b => b.classList.remove('active'));
       e.currentTarget.classList.add('active');
       state.gameSpeed = parseFloat(e.currentTarget.dataset.speed);
@@ -225,6 +230,7 @@ export function initSidebar(elements) {
   const recordToggle = document.getElementById('record-toggle');
   if (recordToggle) {
     recordToggle.addEventListener('change', (e) => {
+      playUIClick();
       state.recordingEnabled = e.target.checked;
     });
   }
@@ -233,6 +239,7 @@ export function initSidebar(elements) {
   const powerupToggle = document.getElementById('powerup-toggle');
   if (powerupToggle) {
     powerupToggle.addEventListener('change', (e) => {
+      playUIClick();
       state.powerupsEnabled = e.target.checked;
     });
   }
@@ -241,6 +248,7 @@ export function initSidebar(elements) {
   const shrinkToggle = document.getElementById('shrink-toggle');
   if (shrinkToggle) {
     shrinkToggle.addEventListener('change', (e) => {
+      playUIClick();
       state.shrinkZoneEnabled = e.target.checked;
     });
   }
@@ -249,6 +257,7 @@ export function initSidebar(elements) {
   const gravityToggle = document.getElementById('gravity-toggle');
   if (gravityToggle) {
     gravityToggle.addEventListener('change', (e) => {
+      playUIClick();
       state.gravityWellsEnabled = e.target.checked;
     });
   }
@@ -257,6 +266,7 @@ export function initSidebar(elements) {
   const bounceToggle = document.getElementById('bounce-toggle');
   if (bounceToggle) {
     bounceToggle.addEventListener('change', (e) => {
+      playUIClick();
       state.bouncePadsEnabled = e.target.checked;
     });
   }
@@ -265,6 +275,7 @@ export function initSidebar(elements) {
   const soundToggle = document.getElementById('sound-toggle');
   if (soundToggle) {
     soundToggle.addEventListener('change', (e) => {
+      playUIClick();
       setSoundEnabled(e.target.checked);
     });
   }
@@ -337,6 +348,9 @@ export function initSidebar(elements) {
 export function handleGameOver(winner, elements) {
   state.running = false;
 
+  // Emit game over event for sound/UI hooks
+  events.emit(EVENTS.GAME_OVER, { winner });
+
   // Stop recording immediately if active
   stopRecording(CONFIG.ball1.name, CONFIG.ball2.name);
 
@@ -351,6 +365,7 @@ export function handleGameOver(winner, elements) {
 
   // Play again handler
   const resetHandler = () => {
+    playUIClick();
     overlay.classList.remove('is-visible');
     playAgain.removeEventListener('click', resetHandler);
     
