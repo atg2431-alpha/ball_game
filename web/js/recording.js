@@ -68,22 +68,15 @@ export async function startRecording(wrapperEl) {
     const BOARD_H = BOARD_W * (5 / 4);       // 4:5 ratio = 1250px
     const BOARD_R = 24;                      // Corner radius
 
-    // HP bars (green animated bars)
-    const HP_BAR_Y = BOARD_Y + BOARD_H + 35;  // ~1582px
-    const HP_BAR_H = 18;
-    const HP_BAR_GAP = 30;
-    const HP_BAR_W = (CONTENT_W - HP_BAR_GAP) / 2;
-    const HP_BAR_R = 9;
-
-    // HP value cards
-    const HP_CARD_Y = HP_BAR_Y + HP_BAR_H + 20;  // ~1620px
+    // HP value cards (directly below board)
+    const HP_CARD_Y = BOARD_Y + BOARD_H + 35;    // ~1582px
     const HP_CARD_H = 56;
     const HP_CARD_GAP = 16;
     const HP_CARD_W = (CONTENT_W - HP_CARD_GAP) / 2;
     const HP_CARD_R = 14;
 
     // Match timer
-    const TIMER_Y = HP_CARD_Y + HP_CARD_H + 30;  // ~1726px (well above IG footer at 1760)
+    const TIMER_Y = HP_CARD_Y + HP_CARD_H + 30;  // ~1668px (well above IG footer at 1760)
 
     // 2. Composite loop
     function drawFrame() {
@@ -192,53 +185,9 @@ export async function startRecording(wrapperEl) {
       recCtx.drawImage(gameCanvas, BOARD_X, BOARD_Y, BOARD_W, BOARD_H);
       recCtx.restore();
 
-      // ── HP Bars (green animated bars) ──
+      // ── HP Values ──
       const hp1 = state.balls.length > 0 ? Math.max(0, state.balls[0].hp) : CONFIG.ball1.hp;
       const hp2 = state.balls.length > 1 ? Math.max(0, state.balls[1].hp) : CONFIG.ball2.hp;
-      const maxHp1 = state.balls.length > 0 ? (state.balls[0].maxHp || CONFIG.ball1.hp) : CONFIG.ball1.hp;
-      const maxHp2 = state.balls.length > 1 ? (state.balls[1].maxHp || CONFIG.ball2.hp) : CONFIG.ball2.hp;
-      const hp1Pct = Math.max(0, hp1 / maxHp1);
-      const hp2Pct = Math.max(0, hp2 / maxHp2);
-
-      // HP bar colors based on percentage
-      function getHpColor(pct) {
-        if (pct > 0.6) return '#22c55e';
-        if (pct > 0.4) return '#eab308';
-        if (pct > 0.2) return '#f97316';
-        return '#ef4444';
-      }
-
-      // Player 1 HP bar
-      const hpBar1X = PAD_X;
-      drawRoundedRect(recCtx, hpBar1X, HP_BAR_Y, HP_BAR_W, HP_BAR_H, HP_BAR_R);
-      recCtx.fillStyle = 'rgba(20, 20, 30, 0.8)';
-      recCtx.fill();
-      recCtx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
-      recCtx.lineWidth = 1;
-      recCtx.stroke();
-      // Fill
-      const fill1W = Math.max(0, hp1Pct * (HP_BAR_W - 4));
-      if (fill1W > 0) {
-        drawRoundedRect(recCtx, hpBar1X + 2, HP_BAR_Y + 2, fill1W, HP_BAR_H - 4, HP_BAR_R - 2);
-        recCtx.fillStyle = getHpColor(hp1Pct);
-        recCtx.fill();
-      }
-
-      // Player 2 HP bar
-      const hpBar2X = PAD_X + HP_BAR_W + HP_BAR_GAP;
-      drawRoundedRect(recCtx, hpBar2X, HP_BAR_Y, HP_BAR_W, HP_BAR_H, HP_BAR_R);
-      recCtx.fillStyle = 'rgba(20, 20, 30, 0.8)';
-      recCtx.fill();
-      recCtx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
-      recCtx.lineWidth = 1;
-      recCtx.stroke();
-      // Fill
-      const fill2W = Math.max(0, hp2Pct * (HP_BAR_W - 4));
-      if (fill2W > 0) {
-        drawRoundedRect(recCtx, hpBar2X + 2, HP_BAR_Y + 2, fill2W, HP_BAR_H - 4, HP_BAR_R - 2);
-        recCtx.fillStyle = getHpColor(hp2Pct);
-        recCtx.fill();
-      }
 
       // ── HP Value Cards ──
       const hpCard1X = PAD_X;
