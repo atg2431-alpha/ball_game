@@ -48,11 +48,13 @@ export const CONFIG = {
       spawnInterval: 10000,
       duration: 5000,
       damage: 10,
+      count: 3,
     },
     longsword: {
       spawnInterval: 10000,
       duration: 5000,
       damage: 15,
+      count: 3,
     },
     gun: {
       spawnInterval: 12000,

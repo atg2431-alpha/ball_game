@@ -73,46 +73,53 @@ export function updateWeapons(timestamp) {
 
     if (ball.weaponExpiry && ball.weaponExpiry > timestamp) {
       // Calculate orbit position
-      const angle = timestamp * CONFIG.weapons.orbitSpeed;
-      const swordX = ball.x + Math.cos(angle) * CONFIG.weapons.orbitRadius;
-      const swordY = ball.y + Math.sin(angle) * CONFIG.weapons.orbitRadius;
-
-      // Render orbit
-      const edgeX = ball.x + Math.cos(angle) * ball.radius;
-      const edgeY = ball.y + Math.sin(angle) * ball.radius;
-
+      const baseAngle = timestamp * CONFIG.weapons.orbitSpeed;
       // Update angle on the ball state for the renderer
-      ball.weaponAngle = angle;
+      ball.weaponAngle = baseAngle;
+      
+      const weaponConfig = CONFIG.weapons[ball.weaponType];
+      const count = weaponConfig.count || 1;
+      const angleStep = (Math.PI * 2) / count;
 
       for (let j = 0; j < state.balls.length; j++) {
         if (j === i) continue;
         const enemy = state.balls[j];
 
         let hit = false;
-        if (ball.weaponType === 'longsword') {
-          // Line segment collision (blade sticks out 40px)
-          const S1x = ball.x + Math.cos(angle) * ball.radius;
-          const S1y = ball.y + Math.sin(angle) * ball.radius;
-          const length = 40;
-          const S2x = ball.x + Math.cos(angle) * (ball.radius + length);
-          const S2y = ball.y + Math.sin(angle) * (ball.radius + length);
+        
+        // Check collision against all weapon instances
+        for (let k = 0; k < count; k++) {
+          const angle = baseAngle + k * angleStep;
           
-          const L2 = length * length;
-          let t = 0;
-          if (L2 > 0) {
-            t = Math.max(0, Math.min(1, ((enemy.x - S1x) * (S2x - S1x) + (enemy.y - S1y) * (S2y - S1y)) / L2));
+          if (ball.weaponType === 'longsword') {
+            // Line segment collision (blade sticks out 40px)
+            const S1x = ball.x + Math.cos(angle) * ball.radius;
+            const S1y = ball.y + Math.sin(angle) * ball.radius;
+            const length = 40;
+            const S2x = ball.x + Math.cos(angle) * (ball.radius + length);
+            const S2y = ball.y + Math.sin(angle) * (ball.radius + length);
+            
+            const L2 = length * length;
+            let t = 0;
+            if (L2 > 0) {
+              t = Math.max(0, Math.min(1, ((enemy.x - S1x) * (S2x - S1x) + (enemy.y - S1y) * (S2y - S1y)) / L2));
+            }
+            const ProjX = S1x + t * (S2x - S1x);
+            const ProjY = S1y + t * (S2y - S1y);
+            const dist = Math.sqrt((enemy.x - ProjX) ** 2 + (enemy.y - ProjY) ** 2);
+            
+            if (dist < enemy.radius + 6) hit = true;
+          } else if (ball.weaponType === 'sword') {
+            const swordX = ball.x + Math.cos(angle) * CONFIG.weapons.orbitRadius;
+            const swordY = ball.y + Math.sin(angle) * CONFIG.weapons.orbitRadius;
+            // Normal point collision
+            const dx = enemy.x - swordX;
+            const dy = enemy.y - swordY;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist < enemy.radius + 10) hit = true;
           }
-          const ProjX = S1x + t * (S2x - S1x);
-          const ProjY = S1y + t * (S2y - S1y);
-          const dist = Math.sqrt((enemy.x - ProjX) ** 2 + (enemy.y - ProjY) ** 2);
           
-          if (dist < enemy.radius + 6) hit = true; // 6 is half-width of blade
-        } else if (ball.weaponType === 'sword') {
-          // Normal point collision
-          const dx = enemy.x - swordX;
-          const dy = enemy.y - swordY;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < enemy.radius + 10) hit = true; // 10 is sword impact radius
+          if (hit) break;
         }
 
         if (hit) {
@@ -136,17 +143,23 @@ export function updateWeapons(timestamp) {
         if (timestamp - ball.lastFireTime > gunConfig.fireRate) {
           ball.lastFireTime = timestamp;
           
-          // Spawn Bullet
-          state.projectiles.push({
-            x: edgeX,
-            y: edgeY,
-            dx: Math.cos(angle),
-            dy: Math.sin(angle),
-            speed: gunConfig.bulletSpeed,
-            lifetime: gunConfig.bulletLifetime,
-            spawnTime: timestamp,
-            ownerId: ball.id,
-          });
+          // Spawn Bullet for all instances
+          for (let k = 0; k < count; k++) {
+            const angle = baseAngle + k * angleStep;
+            const edgeX = ball.x + Math.cos(angle) * ball.radius;
+            const edgeY = ball.y + Math.sin(angle) * ball.radius;
+            
+            state.projectiles.push({
+              x: edgeX,
+              y: edgeY,
+              dx: Math.cos(angle),
+              dy: Math.sin(angle),
+              speed: gunConfig.bulletSpeed,
+              lifetime: gunConfig.bulletLifetime,
+              spawnTime: timestamp,
+              ownerId: ball.id,
+            });
+          }
         }
       }
     } else if (ball.weaponExpiry && ball.weaponExpiry <= timestamp) {

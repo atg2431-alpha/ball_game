@@ -186,34 +186,40 @@ function drawGroundWeapons() {
 function drawOrbitingWeapon(ball) {
   if (!ball.weaponType || !ball.weaponExpiry || ball.weaponAngle === undefined || ball.weaponAngle === null) return;
   
-  const angle = ball.weaponAngle;
+  const baseAngle = ball.weaponAngle;
   const orbitRadius = CONFIG.weapons.orbitRadius;
+  const weaponConfig = CONFIG.weapons[ball.weaponType];
+  const count = weaponConfig.count || 1;
+  const angleStep = (Math.PI * 2) / count;
   
-  let wx, wy;
-  if (ball.weaponType === 'longsword' || ball.weaponType === 'gun') {
-    wx = ball.x + Math.cos(angle) * ball.radius;
-    wy = ball.y + Math.sin(angle) * ball.radius;
-  } else {
-    wx = ball.x + Math.cos(angle) * orbitRadius;
-    wy = ball.y + Math.sin(angle) * orbitRadius;
+  for (let i = 0; i < count; i++) {
+    const angle = baseAngle + i * angleStep;
+    let wx, wy;
+    if (ball.weaponType === 'longsword' || ball.weaponType === 'gun') {
+      wx = ball.x + Math.cos(angle) * ball.radius;
+      wy = ball.y + Math.sin(angle) * ball.radius;
+    } else {
+      wx = ball.x + Math.cos(angle) * orbitRadius;
+      wy = ball.y + Math.sin(angle) * orbitRadius;
+    }
+    
+    ctx.save();
+    ctx.translate(wx, wy);
+    
+    if (ball.weaponType === 'longsword') {
+      ctx.rotate(angle + Math.PI / 4 + Math.PI);
+      ctx.scale(1, -1);
+    } else if (ball.weaponType === 'gun') {
+      ctx.rotate(angle + Math.PI);
+      ctx.scale(-1, 1);
+    }
+    
+    ctx.font = '30px Arial';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(getWeaponEmoji(ball.weaponType), 0, 0);
+    ctx.restore();
   }
-  
-  ctx.save();
-  ctx.translate(wx, wy);
-  
-  if (ball.weaponType === 'longsword') {
-    ctx.rotate(angle + Math.PI / 4 + Math.PI);
-    ctx.scale(1, -1);
-  } else if (ball.weaponType === 'gun') {
-    ctx.rotate(angle + Math.PI);
-    ctx.scale(-1, 1);
-  }
-  
-  ctx.font = '30px Arial';
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillText(getWeaponEmoji(ball.weaponType), 0, 0);
-  ctx.restore();
 }
 
 function drawProjectiles() {

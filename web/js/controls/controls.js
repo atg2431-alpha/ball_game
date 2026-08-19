@@ -404,9 +404,11 @@ export function initSettings(elements) {
 
   bindWeaponInput('sword-spawn', CONFIG.weapons.sword, 'spawnInterval', 1000);
   bindWeaponInput('sword-duration', CONFIG.weapons.sword, 'duration', 1000);
+  bindWeaponInput('sword-count', CONFIG.weapons.sword, 'count', 1);
   
   bindWeaponInput('longsword-spawn', CONFIG.weapons.longsword, 'spawnInterval', 1000);
   bindWeaponInput('longsword-duration', CONFIG.weapons.longsword, 'duration', 1000);
+  bindWeaponInput('longsword-count', CONFIG.weapons.longsword, 'count', 1);
   
   bindWeaponInput('gun-spawn', CONFIG.weapons.gun, 'spawnInterval', 1000);
   bindWeaponInput('gun-duration', CONFIG.weapons.gun, 'duration', 1000);
