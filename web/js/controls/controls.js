@@ -351,8 +351,8 @@ export function handleGameOver(winner, elements) {
   // Emit game over event for sound/UI hooks
   events.emit(EVENTS.GAME_OVER, { winner });
 
-  // Stop recording immediately if active
-  stopRecording(CONFIG.ball1.name, CONFIG.ball2.name);
+  // Stop recording with winner info (will show winner overlay for 3s before saving)
+  stopRecording(CONFIG.ball1.name, CONFIG.ball2.name, winner);
 
   // Find elements globally since we might not have passed them directly
   // or we can just fetch them from the DOM

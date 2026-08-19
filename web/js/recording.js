@@ -20,6 +20,9 @@ let isRecording = false;
 let recCanvas = null;
 let recCtx = null;
 let animFrameId = null;
+let gameOverWinner = null;    // Set when game ends, so the recording can draw the winner overlay
+let gameOverTime = 0;         // Timestamp when game over was triggered
+const GAME_OVER_DELAY = 3000; // ms to keep recording after game over to show winner
 
 export async function startRecording(wrapperEl) {
   try {
@@ -238,6 +241,34 @@ export async function startRecording(wrapperEl) {
       recCtx.textBaseline = 'middle';
       recCtx.fillStyle = 'rgba(255, 255, 255, 0.5)';
       recCtx.fillText('\u23F1 ' + timeStr, W / 2, TIMER_Y);
+
+      // ── Game Over Winner Overlay ──
+      if (gameOverWinner) {
+        // Semi-transparent dark overlay
+        recCtx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+        recCtx.fillRect(BOARD_X, BOARD_Y, BOARD_W, BOARD_H);
+
+        // Winner text
+        const winnerName = gameOverWinner.name || 'Player';
+        const winnerText = `${winnerName} Wins!`;
+        
+        // Glow effect
+        recCtx.save();
+        recCtx.shadowBlur = 30;
+        recCtx.shadowColor = gameOverWinner.id === 'ball-1' ? '#4a9eff' : '#ff4a6a';
+        recCtx.font = 'bold 64px "Outfit", "Inter", sans-serif';
+        recCtx.textAlign = 'center';
+        recCtx.textBaseline = 'middle';
+        recCtx.fillStyle = '#ffffff';
+        recCtx.fillText(winnerText, BOARD_X + BOARD_W / 2, BOARD_Y + BOARD_H / 2);
+        recCtx.restore();
+
+        // Auto-stop recording after delay
+        if (Date.now() - gameOverTime >= GAME_OVER_DELAY) {
+          finalizeStop();
+          return;
+        }
+      }
     }
 
     animFrameId = requestAnimationFrame(drawFrame);
@@ -264,11 +295,34 @@ export async function startRecording(wrapperEl) {
   }
 }
 
-export function stopRecording(player1Name, player2Name) {
+export function stopRecording(player1Name, player2Name, winner) {
   if (!isRecording || !mediaRecorder) return;
   
+  // Store player names for the upload filename
+  stopRecordingPlayerNames = { player1Name, player2Name };
+  
+  // Set the winner — the drawFrame loop will show the overlay and auto-stop after GAME_OVER_DELAY
+  if (winner) {
+    gameOverWinner = winner;
+    gameOverTime = Date.now();
+    // The drawFrame loop will call finalizeStop() after the delay
+  } else {
+    // No winner (manual stop) — stop immediately
+    finalizeStop();
+  }
+}
+
+let stopRecordingPlayerNames = null;
+
+function finalizeStop() {
+  if (!isRecording && !mediaRecorder) return;
+  
   isRecording = false;
+  gameOverWinner = null;
+  gameOverTime = 0;
   if (animFrameId) cancelAnimationFrame(animFrameId);
+
+  const names = stopRecordingPlayerNames || { player1Name: 'P1', player2Name: 'P2' };
 
   mediaRecorder.onstop = async () => {
     const blob = new Blob(recordedChunks, { type: CONFIG.recording.mimeType });
@@ -281,10 +335,11 @@ export function stopRecording(player1Name, player2Name) {
     mediaRecorder = null;
     recCanvas = null;
     recCtx = null;
+    stopRecordingPlayerNames = null;
 
     const now = new Date();
     const timeStr = `${now.getHours()}-${now.getMinutes()}-${now.getSeconds()}`;
-    const filename = `${player1Name}vs${player2Name}_${timeStr}.mp4`;
+    const filename = `${names.player1Name}vs${names.player2Name}_${timeStr}.mp4`;
     
     try {
       console.log('Uploading recording...');
