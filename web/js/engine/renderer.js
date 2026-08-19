@@ -208,7 +208,6 @@ function drawOrbitingWeapon(ball) {
     
     if (ball.weaponType === 'longsword') {
       ctx.rotate(angle + Math.PI / 4 + Math.PI);
-      ctx.scale(1, -1);
     } else if (ball.weaponType === 'gun') {
       ctx.rotate(angle + Math.PI);
       ctx.scale(-1, 1);
