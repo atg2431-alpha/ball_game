@@ -11,6 +11,7 @@ import { state } from '../state.js';
 const def = {
   type: 'freeze_zone',
   name: 'Freeze Zone',
+  description: 'Creates an ice zone that slows enemies by 50%.',
   icon: '❄️',
   rarity: 'rare',
   spawnWeight: 2,
@@ -19,6 +20,7 @@ const def = {
   // Configurable gameplay values
   zoneRadius: 80,
   configurable: [
+    { label: 'Spawn Weight', key: 'spawnWeight', min: 1, max: 10, step: 1 },
     { label: 'Duration (s)', key: 'duration', min: 1, max: 30, step: 1, multiplier: 1000 },
     { label: 'Zone Radius', key: 'zoneRadius', min: 20, max: 200, step: 5 },
   ],

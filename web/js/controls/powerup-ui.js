@@ -61,6 +61,11 @@ function createPowerupItem(def) {
   name.className = 'powerup-item__name';
   name.textContent = def.name;
 
+  // Hover Tooltip
+  if (def.description) {
+    row.title = def.description;
+  }
+
   // Toggle switch
   const toggle = document.createElement('label');
   toggle.className = 'powerup-item__toggle';

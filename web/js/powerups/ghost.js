@@ -7,12 +7,14 @@ import { registerPowerup } from '../systems/powerup-registry.js';
 const def = {
     type: 'ghost',
     name: 'Ghost Phase',
+    description: 'Allows the ball to pass through walls, projectiles, and other balls without taking damage.',
     icon: '👻',
     rarity: 'rare',
     spawnWeight: 2,
     enabled: true,
     duration: 3000,
     configurable: [
+      { label: 'Spawn Weight', key: 'spawnWeight', min: 1, max: 10, step: 1 },
       { label: 'Duration (s)', key: 'duration', min: 1, max: 30, step: 1, multiplier: 1000 },
     ],
     onActivate: (ball) => {

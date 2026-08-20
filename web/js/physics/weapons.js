@@ -84,6 +84,9 @@ export function updateWeapons(timestamp) {
       for (let j = 0; j < state.balls.length; j++) {
         if (j === i) continue;
         const enemy = state.balls[j];
+        
+        // Prevent friendly fire between a ball and its clone
+        if (enemy.id.replace('_clone', '') === ball.id.replace('_clone', '')) continue;
 
         let hit = false;
         
@@ -213,7 +216,7 @@ export function updateProjectiles(timestamp) {
     // Enemy collision
     let hitEnemy = false;
     for (const enemy of state.balls) {
-      if (enemy.id !== proj.ownerId) {
+      if (enemy.id.replace('_clone', '') !== proj.ownerId.replace('_clone', '')) {
         const dx = enemy.x - proj.x;
         const dy = enemy.y - proj.y;
         const dist = Math.sqrt(dx * dx + dy * dy);

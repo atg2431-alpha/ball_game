@@ -9,6 +9,7 @@ import { registerPowerup } from '../systems/powerup-registry.js';
 const def = {
   type: 'magnet',
   name: 'Magnet',
+  description: 'Attracts nearby power-up items and weapon items.',
   icon: '🧲',
   rarity: 'common',
   spawnWeight: 3,
@@ -17,6 +18,7 @@ const def = {
   // Configurable gameplay values
   pullRadius: 120,
   configurable: [
+    { label: 'Spawn Weight', key: 'spawnWeight', min: 1, max: 10, step: 1 },
     { label: 'Duration (s)', key: 'duration', min: 1, max: 30, step: 1, multiplier: 1000 },
     { label: 'Pull Radius', key: 'pullRadius', min: 30, max: 300, step: 5 },
   ],

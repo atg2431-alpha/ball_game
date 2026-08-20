@@ -7,6 +7,7 @@ import { registerPowerup } from '../systems/powerup-registry.js';
 const def = {
     type: 'mega-growth',
     name: 'Mega Growth',
+    description: 'Substantially increases the size and mass of the ball.',
     icon: '🔮',
     rarity: 'rare',
     spawnWeight: 2,
@@ -15,6 +16,7 @@ const def = {
     // Configurable gameplay values
     radiusMultiplier: 1.8,
     configurable: [
+      { label: 'Spawn Weight', key: 'spawnWeight', min: 1, max: 10, step: 1 },
       { label: 'Duration (s)', key: 'duration', min: 1, max: 30, step: 1, multiplier: 1000 },
       { label: 'Size ×', key: 'radiusMultiplier', min: 1.1, max: 4, step: 0.1 },
     ],

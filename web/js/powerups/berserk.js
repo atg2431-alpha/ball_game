@@ -7,6 +7,7 @@ import { registerPowerup } from '../systems/powerup-registry.js';
 const def = {
     type: 'berserk',
     name: 'Berserk Mode',
+    description: 'Increases ball speed and damage for a short duration with a red rage aura.',
     icon: '🔥',
     rarity: 'rare',
     spawnWeight: 2,
@@ -16,6 +17,7 @@ const def = {
     speedMultiplier: 1.5,
     damageMultiplier: 1.5,
     configurable: [
+      { label: 'Spawn Weight', key: 'spawnWeight', min: 1, max: 10, step: 1 },
       { label: 'Duration (s)', key: 'duration', min: 1, max: 30, step: 1, multiplier: 1000 },
       { label: 'Speed ×', key: 'speedMultiplier', min: 1, max: 5, step: 0.1 },
       { label: 'Damage ×', key: 'damageMultiplier', min: 1, max: 5, step: 0.1 },

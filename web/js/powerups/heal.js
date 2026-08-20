@@ -8,6 +8,7 @@ import { particleSystem, PARTICLE_PRESETS } from '../systems/particle.js';
 const def = {
   type: 'heal',
   name: 'Heal Pulse',
+  description: 'Instantly heals the ball and emits a burst of green healing particles.',
   icon: '💚',
   rarity: 'common',
   spawnWeight: 4,
@@ -16,6 +17,7 @@ const def = {
   // Configurable gameplay values
   healAmount: 20,
   configurable: [
+    { label: 'Spawn Weight', key: 'spawnWeight', min: 1, max: 10, step: 1 },
     { label: 'Heal Amount', key: 'healAmount', min: 1, max: 100, step: 1 },
   ],
 

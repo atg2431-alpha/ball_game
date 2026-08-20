@@ -9,6 +9,7 @@ import { registerPowerup } from '../systems/powerup-registry.js';
 const def = {
   type: 'split',
   name: 'Split',
+  description: 'Splits the ball into 2 smaller copies sharing HP.',
   icon: '🦠',
   rarity: 'rare',
   spawnWeight: 2,
@@ -17,6 +18,7 @@ const def = {
   // Configurable gameplay values
   radiusMultiplier: 0.6,
   configurable: [
+    { label: 'Spawn Weight', key: 'spawnWeight', min: 1, max: 10, step: 1 },
     { label: 'Duration (s)', key: 'duration', min: 1, max: 30, step: 1, multiplier: 1000 },
     { label: 'Size ×', key: 'radiusMultiplier', min: 0.2, max: 0.9, step: 0.05 },
   ],
@@ -43,6 +45,15 @@ const def = {
   onTick: (ball, dt, state, events) => {
     if (ball.cloneRef) {
       ball.cloneRef.hp = ball.hp;
+      
+      // Sync weapon properties so both get the orbiting weapons
+      if ((ball.weaponExpiry || 0) > (ball.cloneRef.weaponExpiry || 0)) {
+        ball.cloneRef.weaponType = ball.weaponType;
+        ball.cloneRef.weaponExpiry = ball.weaponExpiry;
+      } else if ((ball.cloneRef.weaponExpiry || 0) > (ball.weaponExpiry || 0)) {
+        ball.weaponType = ball.cloneRef.weaponType;
+        ball.weaponExpiry = ball.cloneRef.weaponExpiry;
+      }
     }
   },
 
