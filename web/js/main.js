@@ -21,6 +21,7 @@ import { spawnDamageNumber } from './ui/damage-numbers.js';
 import { showBanner } from './ui/event-banner.js';
 import { resetPowerups } from './systems/powerup-registry.js';
 import { initPowerupUI } from './controls/powerup-ui.js';
+import { loadSettings, saveSettings } from './systems/storage.js';
 // Import all power-up modules to trigger self-registration
 import './powerups/split.js';
 import './powerups/magnet.js';
@@ -157,8 +158,19 @@ function init() {
   initPowerupFlash();
   initSoundHooks();
   
+  // Load settings from localStorage before building the dynamic UI
+  loadSettings();
+  
   // Initialize Power-up Configuration UI (after power-up modules are loaded)
   initPowerupUI();
+  
+  // Save settings whenever any input in the UI changes
+  document.addEventListener('change', (e) => {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') {
+      // Small delay to allow the specific module's 'change' listener to update state/CONFIG first
+      setTimeout(saveSettings, 50);
+    }
+  });
   
   // Add window resize handler
   window.addEventListener('resize', () => {
