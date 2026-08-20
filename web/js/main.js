@@ -21,6 +21,7 @@ import { spawnDamageNumber } from './ui/damage-numbers.js';
 import { showBanner } from './ui/event-banner.js';
 import { resetPowerups } from './systems/powerup-registry.js';
 import { initPowerupUI } from './controls/powerup-ui.js';
+import { initCustomiseUI } from './controls/customise-ui.js';
 import { loadSettings, saveSettings } from './systems/storage.js';
 // Import all power-up modules to trigger self-registration
 import './powerups/split.js';
@@ -163,6 +164,9 @@ function init() {
   
   // Initialize Power-up Configuration UI (after power-up modules are loaded)
   initPowerupUI();
+  
+  // Initialize Customise panel (wallpaper, contrast)
+  initCustomiseUI();
   
   // Save settings whenever any input in the UI changes
   document.addEventListener('change', (e) => {

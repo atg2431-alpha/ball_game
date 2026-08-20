@@ -17,6 +17,32 @@
   </button>
 
   <div class="main-container">
+    <!-- FAR LEFT COLUMN: Customise -->
+    <div class="far-left-column">
+      <aside class="sidebar customise-sidebar" style="margin-top: 0;">
+        <h3 style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 12px;">🎨 Customise</h3>
+
+        <div class="customise-row">
+          <span class="customise-row__label">Board Wallpaper</span>
+          <div class="customise-row__actions">
+            <button class="btn-customise-upload" id="wallpaper-upload-btn" title="Upload Wallpaper">📁 Upload</button>
+            <button class="btn-customise-remove" id="wallpaper-remove-btn" title="Remove Wallpaper" style="display: none;">✕</button>
+          </div>
+          <input type="file" id="wallpaper-file-input" accept="image/*" style="display: none;">
+        </div>
+
+        <div class="customise-thumbnail" id="wallpaper-thumbnail">
+          <span class="customise-thumbnail__placeholder">No wallpaper</span>
+        </div>
+
+        <div class="customise-slider-row">
+          <span class="customise-slider-row__label">Contrast</span>
+          <input type="range" id="board-contrast" class="customise-range" min="0" max="100" value="50">
+          <span class="customise-slider-row__value" id="board-contrast-value">50</span>
+        </div>
+      </aside>
+    </div>
+
     <!-- LEFT COLUMN: Modifiers -->
     <div class="left-column">
       <aside class="sidebar modifiers-sidebar">
@@ -244,6 +270,28 @@
     </div>
   </div>
   
+  <!-- Crop Modal -->
+  <div class="crop-modal" id="crop-modal" style="display: none;">
+    <div class="crop-modal__card">
+      <h3 class="crop-modal__title">Crop Wallpaper</h3>
+      <p class="crop-modal__hint">Drag to reposition • Corners to resize • Locked to 4:5 ratio</p>
+      <div class="crop-modal__canvas-wrap">
+        <canvas id="crop-canvas"></canvas>
+      </div>
+      <div class="crop-modal__controls">
+        <div class="crop-modal__slider-row">
+          <span>Contrast</span>
+          <input type="range" id="crop-contrast" class="customise-range" min="0" max="100" value="50">
+          <span id="crop-contrast-value">50</span>
+        </div>
+        <div class="crop-modal__buttons">
+          <button class="btn-crop btn-crop--cancel" id="crop-cancel-btn">Cancel</button>
+          <button class="btn-crop btn-crop--apply" id="crop-apply-btn">✓ Apply</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script>
     window.addEventListener('error', function(e) {
       const log = document.getElementById('error-log');

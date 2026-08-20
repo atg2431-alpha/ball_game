@@ -10,6 +10,7 @@ import { state } from '../state.js';
 import { getRegistry } from './powerup-registry.js';
 
 const STORAGE_KEY = 'insta_game_settings';
+const WALLPAPER_KEY = 'insta_game_wallpaper';
 
 export function saveSettings() {
   const data = {
@@ -25,7 +26,10 @@ export function saveSettings() {
       hazardsEnabled: state.hazardsEnabled,
       soundEnabled: state.soundEnabled
     },
-    powerups: {}
+    powerups: {},
+    customise: {
+      boardContrast: state.boardContrast !== undefined ? state.boardContrast : 50
+    }
   };
 
   const registry = getRegistry();
@@ -91,6 +95,13 @@ export function loadSettings() {
       }
     }
 
+    // Restore customise settings
+    if (data.customise) {
+      if (data.customise.boardContrast !== undefined) {
+        state.boardContrast = data.customise.boardContrast;
+      }
+    }
+
     updateUIFromLoadedSettings();
 
   } catch (e) {
@@ -144,4 +155,48 @@ function updateUIFromLoadedSettings() {
   syncWeaponInput('gun-duration', CONFIG.weapons.gun, 'duration', 1000);
   syncWeaponInput('gun-fire-rate', CONFIG.weapons.gun, 'fireRate', 1000);
   syncWeaponInput('gun-bullet-life', CONFIG.weapons.gun, 'bulletLifetime', 1000);
+
+  // Sync contrast slider
+  const contrastSlider = document.getElementById('board-contrast');
+  if (contrastSlider && state.boardContrast !== undefined) {
+    contrastSlider.value = state.boardContrast;
+  }
+}
+
+// ─── Wallpaper Storage (separate key due to large data) ─────
+
+/**
+ * Save a cropped wallpaper data URL to localStorage.
+ * @param {string} dataUrl - JPEG base64 data URL
+ */
+export function saveWallpaper(dataUrl) {
+  try {
+    localStorage.setItem(WALLPAPER_KEY, dataUrl);
+  } catch (e) {
+    console.warn('Failed to save wallpaper to localStorage (may exceed quota):', e);
+  }
+}
+
+/**
+ * Load the saved wallpaper data URL from localStorage.
+ * @returns {string|null}
+ */
+export function loadWallpaper() {
+  try {
+    return localStorage.getItem(WALLPAPER_KEY);
+  } catch (e) {
+    console.warn('Failed to load wallpaper from localStorage:', e);
+    return null;
+  }
+}
+
+/**
+ * Clear the saved wallpaper from localStorage.
+ */
+export function clearWallpaper() {
+  try {
+    localStorage.removeItem(WALLPAPER_KEY);
+  } catch (e) {
+    console.warn('Failed to clear wallpaper from localStorage:', e);
+  }
 }

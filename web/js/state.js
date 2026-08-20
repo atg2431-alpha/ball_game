@@ -50,4 +50,11 @@ export const state = {
   // Timing
   simulatedTime: undefined,
   lastRealTime: undefined,
+  
+  // Customise
+  boardContrast: 50,       // 0-100, maps to CSS contrast(0%-200%)
+  
+  // Recording & Sound
+  recordingEnabled: false,
+  soundEnabled: false,
 };
