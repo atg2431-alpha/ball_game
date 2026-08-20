@@ -6,23 +6,29 @@
 
 import { registerPowerup } from '../systems/powerup-registry.js';
 
-registerPowerup({
+const def = {
   type: 'magnet',
   name: 'Magnet',
   icon: '🧲',
   rarity: 'common',
   spawnWeight: 3,
+  enabled: true,
   duration: 6000,
+  // Configurable gameplay values
+  pullRadius: 120,
+  configurable: [
+    { label: 'Duration (s)', key: 'duration', min: 1, max: 30, step: 1, multiplier: 1000 },
+    { label: 'Pull Radius', key: 'pullRadius', min: 30, max: 300, step: 5 },
+  ],
 
   onActivate: (ball, state, events) => {
     ball.magnetActive = true;
   },
 
   onTick: (ball, dt, state, events) => {
-    const pullRadius = 120;
+    const pullRadius = def.pullRadius;
     const accel = 0.15;
     
-    // pull nearby items in state.spawnedItems and state.powerupItems toward ball
     const allItems = [...(state.spawnedItems || []), ...(state.powerupItems || [])];
     
     for (const item of allItems) {
@@ -33,7 +39,6 @@ registerPowerup({
       if (dist < pullRadius && dist > 0) {
         const nx = dx / dist;
         const ny = dy / dist;
-        // Apply acceleration to items, assuming they might not have a velocity vector yet
         if (item.vx === undefined) item.vx = 0;
         if (item.vy === undefined) item.vy = 0;
         
@@ -51,17 +56,14 @@ registerPowerup({
   },
 
   onRender: (ctx, ball, timestamp) => {
-    // draw magnetic field lines (concentric rings pulsing inward)
     ctx.save();
     
     const ringCount = 3;
     for (let i = 0; i < ringCount; i++) {
-      // Inward pulsing radius
-      const maxRadius = 120;
+      const maxRadius = def.pullRadius;
       const offset = (timestamp * 0.05 + i * (maxRadius / ringCount)) % maxRadius;
       const radius = maxRadius - offset;
       
-      // Fade out at edges
       const alpha = Math.max(0, 1 - (maxRadius - radius) / maxRadius);
       
       ctx.beginPath();
@@ -73,4 +75,6 @@ registerPowerup({
     
     ctx.restore();
   }
-});
+};
+
+registerPowerup(def);

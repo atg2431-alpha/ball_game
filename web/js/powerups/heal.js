@@ -5,16 +5,22 @@
 import { registerPowerup } from '../systems/powerup-registry.js';
 import { particleSystem, PARTICLE_PRESETS } from '../systems/particle.js';
 
-registerPowerup({
+const def = {
   type: 'heal',
   name: 'Heal Pulse',
   icon: '💚',
   rarity: 'common',
   spawnWeight: 4,
+  enabled: true,
   duration: 100,
+  // Configurable gameplay values
+  healAmount: 20,
+  configurable: [
+    { label: 'Heal Amount', key: 'healAmount', min: 1, max: 100, step: 1 },
+  ],
 
   onActivate: (ball) => {
-    ball.hp = Math.min(ball.maxHp || 100, (ball.hp || 0) + 20);
+    ball.hp = Math.min(ball.maxHp || 100, (ball.hp || 0) + def.healAmount);
     ball._healStartTime = Date.now();
 
     // Green particle burst upward
@@ -51,4 +57,6 @@ registerPowerup({
     ctx.fillRect(-16, -4, 32, 8);
     ctx.restore();
   }
-});
+};
+
+registerPowerup(def);

@@ -32,6 +32,7 @@ const registry = new Map();
  */
 export function registerPowerup(definition) {
   registry.set(definition.type, definition);
+  if (definition.enabled === undefined) definition.enabled = true;
 }
 
 /** Get all registered definitions */
@@ -39,12 +40,19 @@ export function getRegistry() {
   return registry;
 }
 
+/** Get configurable attributes for a power-up type */
+export function getConfigurableAttributes(type) {
+  const def = registry.get(type);
+  if (!def || !def.configurable) return [];
+  return def.configurable;
+}
+
 /**
  * Pick a random power-up type using weighted random selection.
  * @returns {Object} A power-up definition
  */
 function weightedRandomPick() {
-  const entries = [...registry.values()];
+  const entries = [...registry.values()].filter(e => e.enabled !== false);
   if (entries.length === 0) return null;
   
   const totalWeight = entries.reduce((sum, e) => sum + (e.spawnWeight || 1), 0);

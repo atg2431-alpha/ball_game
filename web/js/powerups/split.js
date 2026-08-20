@@ -6,20 +6,25 @@
 
 import { registerPowerup } from '../systems/powerup-registry.js';
 
-registerPowerup({
+const def = {
   type: 'split',
   name: 'Split',
   icon: '🦠',
   rarity: 'rare',
   spawnWeight: 2,
+  enabled: true,
   duration: 8000,
+  // Configurable gameplay values
+  radiusMultiplier: 0.6,
+  configurable: [
+    { label: 'Duration (s)', key: 'duration', min: 1, max: 30, step: 1, multiplier: 1000 },
+    { label: 'Size ×', key: 'radiusMultiplier', min: 0.2, max: 0.9, step: 0.05 },
+  ],
 
   onActivate: (ball, state, events) => {
-    // shrink ball radius to 60%
     ball.originalRadius = ball.radius;
-    ball.radius *= 0.6;
+    ball.radius *= def.radiusMultiplier;
     
-    // create a clone ball in state.balls with same HP shared
     const clone = {
       ...ball,
       id: ball.id + '_clone',
@@ -27,7 +32,7 @@ registerPowerup({
       y: ball.y + (Math.random() - 0.5) * 20,
       vx: ball.vx * -1,
       vy: ball.vy * -1,
-      activePowerups: [], // clone doesn't inherit active powerups
+      activePowerups: [],
       isClone: true
     };
     
@@ -36,20 +41,17 @@ registerPowerup({
   },
 
   onTick: (ball, dt, state, events) => {
-    // Sharing HP - sync HP from main ball to clone or vice versa if needed
     if (ball.cloneRef) {
       ball.cloneRef.hp = ball.hp;
     }
   },
 
   onExpire: (ball, state, events) => {
-    // restore original radius
     if (ball.originalRadius) {
       ball.radius = ball.originalRadius;
       delete ball.originalRadius;
     }
     
-    // remove the clone
     if (ball.cloneRef) {
       const index = state.balls.findIndex(b => b.id === ball.cloneRef.id);
       if (index !== -1) {
@@ -60,7 +62,6 @@ registerPowerup({
   },
 
   onRender: (ctx, ball, timestamp) => {
-    // draw a pulsing connection line between original and clone
     if (ball.cloneRef && !ball.isClone) {
       const clone = ball.cloneRef;
       ctx.beginPath();
@@ -73,4 +74,6 @@ registerPowerup({
       ctx.stroke();
     }
   }
-});
+};
+
+registerPowerup(def);

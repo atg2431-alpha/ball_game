@@ -4,26 +4,28 @@
  */
 import { registerPowerup } from '../systems/powerup-registry.js';
 
-registerPowerup({
+const def = {
     type: 'ghost',
     name: 'Ghost Phase',
     icon: '👻',
     rarity: 'rare',
     spawnWeight: 2,
+    enabled: true,
     duration: 3000,
+    configurable: [
+      { label: 'Duration (s)', key: 'duration', min: 1, max: 30, step: 1, multiplier: 1000 },
+    ],
     onActivate: (ball) => {
         ball.isGhost = true;
-        ball.ghostTrails = []; // Used for rendering afterimages
+        ball.ghostTrails = [];
     },
     onTick: (ball, elapsedMs) => {
         if (!ball.ghostTrails) ball.ghostTrails = [];
         
-        // Add trail every few frames/ticks
         if (Math.random() < 0.4) {
             ball.ghostTrails.push({ x: ball.x, y: ball.y, time: Date.now() });
         }
         
-        // Cleanup old trails (older than 400ms)
         const now = Date.now();
         ball.ghostTrails = ball.ghostTrails.filter(t => now - t.time < 400);
     },
@@ -44,4 +46,6 @@ registerPowerup({
             ctx.fill();
         });
     }
-});
+};
+
+registerPowerup(def);

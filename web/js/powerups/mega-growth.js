@@ -4,16 +4,23 @@
  */
 import { registerPowerup } from '../systems/powerup-registry.js';
 
-registerPowerup({
+const def = {
     type: 'mega-growth',
     name: 'Mega Growth',
     icon: '🔮',
     rarity: 'rare',
     spawnWeight: 2,
+    enabled: true,
     duration: 6000,
+    // Configurable gameplay values
+    radiusMultiplier: 1.8,
+    configurable: [
+      { label: 'Duration (s)', key: 'duration', min: 1, max: 30, step: 1, multiplier: 1000 },
+      { label: 'Size ×', key: 'radiusMultiplier', min: 1.1, max: 4, step: 0.1 },
+    ],
     onActivate: (ball) => {
         ball._originalRadius = ball.radius;
-        ball.radius = ball.radius * 1.8;
+        ball.radius = ball.radius * def.radiusMultiplier;
         
         ball._originalMass = ball.mass;
         ball.mass = 2.0;
@@ -32,7 +39,6 @@ registerPowerup({
         }
     },
     onRender: (ctx, ball, timeSinceActivate) => {
-        // Draw pulsing size ring at the new enlarged boundary
         const pulse = Math.abs(Math.sin(Date.now() / 250));
         ctx.beginPath();
         ctx.arc(ball.x, ball.y, ball.radius + 3 + pulse * 8, 0, Math.PI * 2);
@@ -40,4 +46,6 @@ registerPowerup({
         ctx.lineWidth = 2 + pulse * 2;
         ctx.stroke();
     }
-});
+};
+
+registerPowerup(def);

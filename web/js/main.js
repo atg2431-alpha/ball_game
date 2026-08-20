@@ -20,6 +20,7 @@ import { assets, ASSET_MANIFEST } from './systems/asset-loader.js';
 import { spawnDamageNumber } from './ui/damage-numbers.js';
 import { showBanner } from './ui/event-banner.js';
 import { resetPowerups } from './systems/powerup-registry.js';
+import { initPowerupUI } from './controls/powerup-ui.js';
 // Import all power-up modules to trigger self-registration
 import './powerups/split.js';
 import './powerups/magnet.js';
@@ -155,6 +156,9 @@ function init() {
   initDeathExplosion();
   initPowerupFlash();
   initSoundHooks();
+  
+  // Initialize Power-up Configuration UI (after power-up modules are loaded)
+  initPowerupUI();
   
   // Add window resize handler
   window.addEventListener('resize', () => {

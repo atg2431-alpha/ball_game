@@ -7,16 +7,23 @@
 import { registerPowerup } from '../systems/powerup-registry.js';
 import { EVENTS } from '../systems/event-bus.js';
 
-registerPowerup({
+const def = {
   type: 'laser',
   name: 'Laser',
   icon: '⚡',
   rarity: 'legendary',
   spawnWeight: 1,
+  enabled: true,
   duration: 500,
+  // Configurable gameplay values
+  laserDamage: 25,
+  beamLength: 2000,
+  configurable: [
+    { label: 'Damage', key: 'laserDamage', min: 1, max: 100, step: 1 },
+    { label: 'Beam Length', key: 'beamLength', min: 500, max: 5000, step: 100 },
+  ],
 
   onActivate: (ball, state, events) => {
-    // Calculate direction from current velocity
     const speed = Math.sqrt(ball.vx * ball.vx + ball.vy * ball.vy);
     let dirX = 1;
     let dirY = 0;
@@ -26,24 +33,21 @@ registerPowerup({
       dirY = ball.vy / speed;
     }
     
-    const length = 2000; // Screen-width beam
+    const length = def.beamLength;
     const x1 = ball.x;
     const y1 = ball.y;
     const x2 = ball.x + dirX * length;
     const y2 = ball.y + dirY * length;
     
-    // Store beam data for rendering
     ball.laserBeam = {
       x1, y1, x2, y2,
       startTime: Date.now(),
       duration: 400
     };
     
-    // Check line-circle intersection for all enemy balls
     for (const other of state.balls) {
       if (other.id === ball.id) continue;
       
-      // Basic line-point distance
       const l2 = (x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1);
       if (l2 === 0) continue;
       
@@ -55,8 +59,8 @@ registerPowerup({
       
       const dist = Math.sqrt((other.x - px) * (other.x - px) + (other.y - py) * (other.y - py));
       
-      if (dist < other.radius + 10) { // +10 for beam width
-        const damage = 25;
+      if (dist < other.radius + 10) {
+        const damage = def.laserDamage;
         other.hp = Math.max(0, other.hp - damage);
         if (other.hpDisplay) other.hpDisplay.value = other.hp;
         events.emit(EVENTS.DAMAGE_DEALT, { source: ball, target: other, amount: damage, weaponType: 'laser' });
@@ -64,9 +68,7 @@ registerPowerup({
     }
   },
 
-  onTick: (ball, dt, state, events) => {
-    // nothing
-  },
+  onTick: (ball, dt, state, events) => {},
 
   onExpire: (ball, state, events) => {
     delete ball.laserBeam;
@@ -80,13 +82,11 @@ registerPowerup({
     
     const { x1, y1, x2, y2 } = ball.laserBeam;
     
-    // Fade out over duration
     const progress = elapsed / ball.laserBeam.duration;
     const alpha = 1 - progress;
     
     ctx.save();
     
-    // Outer glow
     ctx.beginPath();
     ctx.moveTo(x1, y1);
     ctx.lineTo(x2, y2);
@@ -95,7 +95,6 @@ registerPowerup({
     ctx.lineCap = 'round';
     ctx.stroke();
     
-    // Inner core
     ctx.beginPath();
     ctx.moveTo(x1, y1);
     ctx.lineTo(x2, y2);
@@ -106,4 +105,6 @@ registerPowerup({
     
     ctx.restore();
   }
-});
+};
+
+registerPowerup(def);

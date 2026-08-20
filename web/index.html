@@ -22,13 +22,27 @@
       <aside class="sidebar modifiers-sidebar">
         <h3 style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 12px;">⚡ Modifiers</h3>
         
-        <label class="toggle-container" title="Enable Power-ups">
-          <span class="toggle-label">Power-ups</span>
-          <div class="toggle-switch">
-            <input type="checkbox" id="powerup-toggle">
-            <span class="slider"></span>
+        <div class="toggle-with-chevron">
+          <label class="toggle-container" title="Enable Power-ups">
+            <span class="toggle-label">Power-ups</span>
+            <div class="toggle-switch">
+              <input type="checkbox" id="powerup-toggle">
+              <span class="slider"></span>
+            </div>
+          </label>
+          <button class="btn-powerup-chevron" id="powerup-popover-btn" title="Configure Power-ups">›</button>
+        </div>
+
+        <!-- Power-up Configuration Popover (built dynamically by JS) -->
+        <div class="powerup-popover" id="powerup-popover" style="display: none;">
+          <div class="powerup-popover__header">
+            <button class="powerup-popover__back" id="powerup-popover-close">‹</button>
+            <span class="powerup-popover__title">Power-Ups</span>
           </div>
-        </label>
+          <div class="powerup-popover__list" id="powerup-popover-list">
+            <!-- Populated by powerup-ui.js -->
+          </div>
+        </div>
 
         <label class="toggle-container" title="Enable Arena Shrink">
           <span class="toggle-label">Arena Shrink</span>
