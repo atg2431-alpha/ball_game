@@ -54,6 +54,10 @@ export const state = {
   // Customise
   boardContrast: 50,       // 0-100, maps to CSS contrast(0%-200%)
   
+  // Player customisation
+  playerColors: { 'ball-1': 'blue', 'ball-2': 'red' },
+  playerNames:  { 'ball-1': 'Player 1', 'ball-2': 'Player 2' },
+  
   // Recording & Sound
   recordingEnabled: false,
   soundEnabled: false,

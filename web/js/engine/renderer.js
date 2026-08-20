@@ -123,8 +123,39 @@ export function renderFrame() {
   renderFlash(ctx, width, height);
 }
 
+function getBallPalette(ballId) {
+  const colour = state.playerColors?.[ballId] ?? (ballId === 'ball-1' ? 'blue' : 'red');
+  switch (colour) {
+    case 'green':
+      return {
+        shadow: '#86efac',
+        gradientLight: '#4ade80',
+        gradientDark: '#16a34a',
+        trailRgb: [74, 222, 128],
+        aimColor: '#22c55e',
+      };
+    case 'red':
+      return {
+        shadow: '#fca5a5',
+        gradientLight: '#f87171',
+        gradientDark: '#ef4444',
+        trailRgb: [248, 113, 113],
+        aimColor: '#ff4a6a',
+      };
+    case 'blue':
+    default:
+      return {
+        shadow: '#93c5fd',
+        gradientLight: '#60a5fa',
+        gradientDark: '#3b82f6',
+        trailRgb: [96, 165, 250],
+        aimColor: '#4a9eff',
+      };
+  }
+}
+
 function drawBall(ball) {
-  const isBlue = ball.id === 'ball-1';
+  const palette = getBallPalette(ball.id);
   
   ctx.save();
   if (ball.isGhost) {
@@ -135,21 +166,15 @@ function drawBall(ball) {
   
   // Glowing effect
   ctx.shadowBlur = 15;
-  ctx.shadowColor = isBlue ? '#93c5fd' : '#fca5a5';
+  ctx.shadowColor = palette.shadow;
 
   // Gradient fill
   const gradient = ctx.createRadialGradient(
     ball.x - ball.radius * 0.3, ball.y - ball.radius * 0.3, ball.radius * 0.1,
     ball.x, ball.y, ball.radius
   );
-  
-  if (isBlue) {
-    gradient.addColorStop(0, '#60a5fa');
-    gradient.addColorStop(1, '#3b82f6');
-  } else {
-    gradient.addColorStop(0, '#f87171');
-    gradient.addColorStop(1, '#ef4444');
-  }
+  gradient.addColorStop(0, palette.gradientLight);
+  gradient.addColorStop(1, palette.gradientDark);
   
   ctx.fillStyle = gradient;
   ctx.fill();
@@ -242,8 +267,7 @@ function drawAimLines() {
     const ball = state.balls.find(b => b.id === ballId);
     if (!ball) continue;
 
-    const isBlue = ballId === 'ball-1';
-    const color = isBlue ? '#4a9eff' : '#ff4a6a';
+    const color = getBallPalette(ballId).aimColor;
 
     const aimLen = Math.min(aim.speed * 15, 100);
     const endX = ball.x + aim.dx * aimLen;
@@ -274,8 +298,7 @@ function drawAimLines() {
 function drawTrail(ball) {
   if (!ball.trail || ball.trail.length < 2) return;
   
-  const isBlue = ball.id === 'ball-1';
-  const baseColor = isBlue ? [96, 165, 250] : [248, 113, 113]; // RGB values
+  const baseColor = getBallPalette(ball.id).trailRgb;
   
   ctx.save();
   ctx.lineCap = 'round';
@@ -284,15 +307,15 @@ function drawTrail(ball) {
     const prev = ball.trail[i - 1];
     const curr = ball.trail[i];
     const alpha = 1 - (i / ball.trail.length);
-    const width = ball.radius * 2 * (1 - i / ball.trail.length) * 0.6;
+    const trailWidth = ball.radius * 2 * (1 - i / ball.trail.length) * 0.6;
     
-    if (width < 0.5) continue;
+    if (trailWidth < 0.5) continue;
     
     ctx.beginPath();
     ctx.moveTo(prev.x, prev.y);
     ctx.lineTo(curr.x, curr.y);
     ctx.strokeStyle = `rgba(${baseColor[0]}, ${baseColor[1]}, ${baseColor[2]}, ${alpha * 0.3})`;
-    ctx.lineWidth = width;
+    ctx.lineWidth = trailWidth;
     ctx.stroke();
   }
   

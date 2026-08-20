@@ -58,23 +58,77 @@
       <div class="detail-section" data-panel="customise">
         <h3 class="detail-section__title">🎨 Customise</h3>
 
-        <div class="customise-row">
-          <span class="customise-row__label">Board Wallpaper</span>
-          <div class="customise-row__actions">
-            <button class="btn-customise-upload" id="wallpaper-upload-btn" title="Upload Wallpaper">📁 Upload</button>
-            <button class="btn-customise-remove" id="wallpaper-remove-btn" title="Remove Wallpaper" style="display: none;">✕</button>
+        <!-- Board accordion -->
+        <div class="customise-accordion">
+          <button class="customise-accordion__header" id="board-accordion-btn" type="button">
+            <span class="customise-accordion__label">Board</span>
+            <span class="customise-accordion__chevron">›</span>
+          </button>
+          <div class="customise-accordion__body" id="board-accordion-body">
+            <div class="customise-row">
+              <span class="customise-row__label">Wallpaper</span>
+              <div class="customise-row__actions">
+                <button class="btn-customise-upload" id="wallpaper-upload-btn" title="Upload Wallpaper">📁 Upload</button>
+                <button class="btn-customise-remove" id="wallpaper-remove-btn" title="Remove Wallpaper" style="display: none;">✕</button>
+              </div>
+              <input type="file" id="wallpaper-file-input" accept="image/*" style="display: none;">
+            </div>
+
+            <div class="customise-thumbnail" id="wallpaper-thumbnail">
+              <span class="customise-thumbnail__placeholder">No wallpaper</span>
+            </div>
+
+            <div class="customise-slider-row">
+              <span class="customise-slider-row__label">Contrast</span>
+              <input type="range" id="board-contrast" class="customise-range" min="0" max="100" value="50">
+              <input type="number" id="board-contrast-value" class="customise-slider-row__input" min="0" max="100" value="50">
+            </div>
           </div>
-          <input type="file" id="wallpaper-file-input" accept="image/*" style="display: none;">
         </div>
 
-        <div class="customise-thumbnail" id="wallpaper-thumbnail">
-          <span class="customise-thumbnail__placeholder">No wallpaper</span>
-        </div>
+        <!-- Player accordion -->
+        <div class="customise-accordion">
+          <button class="customise-accordion__header" id="player-accordion-btn" type="button">
+            <span class="customise-accordion__label">Player</span>
+            <span class="customise-accordion__chevron">›</span>
+          </button>
+          <div class="customise-accordion__body" id="player-accordion-body">
 
-        <div class="customise-slider-row">
-          <span class="customise-slider-row__label">Contrast</span>
-          <input type="range" id="board-contrast" class="customise-range" min="0" max="100" value="50">
-          <input type="number" id="board-contrast-value" class="customise-slider-row__input" min="0" max="100" value="50">
+            <!-- Player 1 -->
+            <div class="player-settings-slot">
+              <p class="player-settings-slot__heading player-settings-slot__heading--blue">Player 1</p>
+              <label class="player-settings-slot__row">
+                <span>Name</span>
+                <input type="text" id="player1-name" class="player-settings-input" placeholder="Player 1" maxlength="20">
+              </label>
+              <label class="player-settings-slot__row">
+                <span>Colour</span>
+                <div class="colour-selector" id="player1-colour">
+                  <button class="colour-btn colour-btn--blue active" data-colour="blue" data-player="1" title="Blue"></button>
+                  <button class="colour-btn colour-btn--red"  data-colour="red"  data-player="1" title="Red"></button>
+                  <button class="colour-btn colour-btn--green" data-colour="green" data-player="1" title="Green"></button>
+                </div>
+              </label>
+            </div>
+
+            <!-- Player 2 -->
+            <div class="player-settings-slot player-settings-slot--divider">
+              <p class="player-settings-slot__heading player-settings-slot__heading--red">Player 2</p>
+              <label class="player-settings-slot__row">
+                <span>Name</span>
+                <input type="text" id="player2-name" class="player-settings-input" placeholder="Player 2" maxlength="20">
+              </label>
+              <label class="player-settings-slot__row">
+                <span>Colour</span>
+                <div class="colour-selector" id="player2-colour">
+                  <button class="colour-btn colour-btn--blue"  data-colour="blue"  data-player="2" title="Blue"></button>
+                  <button class="colour-btn colour-btn--red active"   data-colour="red"   data-player="2" title="Red"></button>
+                  <button class="colour-btn colour-btn--green" data-colour="green" data-player="2" title="Green"></button>
+                </div>
+              </label>
+            </div>
+
+          </div>
         </div>
       </div>
 
@@ -247,12 +301,12 @@
 
         <!-- Player Labels -->
         <div class="player-labels">
-          <div class="player-label player-label--blue">
-            <span class="player-label__name">Player 1</span>
+          <div class="player-label player-label--blue" id="player1-label">
+            <span class="player-label__name" id="player1-label-name">Player 1</span>
           </div>
           <div class="versus-badge">VS</div>
-          <div class="player-label player-label--red">
-            <span class="player-label__name">Player 2</span>
+          <div class="player-label player-label--red" id="player2-label">
+            <span class="player-label__name" id="player2-label-name">Player 2</span>
           </div>
         </div>
 
