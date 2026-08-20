@@ -42,7 +42,7 @@ export function initCustomiseUI() {
 
   if (contrastSlider) {
     contrastSlider.value = savedContrast;
-    if (contrastValue) contrastValue.textContent = savedContrast;
+    if (contrastValue) contrastValue.value = savedContrast;
   }
 
   // ── Upload Button ──
@@ -54,7 +54,7 @@ export function initCustomiseUI() {
 
     const reader = new FileReader();
     reader.onload = (ev) => {
-      openCropModal(ev.target.result, boardEl, thumbnail, removeBtn, contrastSlider);
+      openCropModal(ev.target.result, boardEl, thumbnail, removeBtn, contrastSlider, contrastValue);
     };
     reader.readAsDataURL(file);
     // Reset so same file can be re-selected
@@ -73,25 +73,53 @@ export function initCustomiseUI() {
       removeBtn.style.display = 'none';
       clearWallpaper();
       if (contrastSlider) contrastSlider.value = 50;
-      if (contrastValue) contrastValue.textContent = '50';
+      if (contrastValue) contrastValue.value = 50;
       state.boardContrast = 50;
       saveSettings();
     });
   }
 
-  // ── Contrast Slider (live update) ──
-  if (contrastSlider) {
+  // ── Contrast Slider & Input (live update) ──
+  const syncContrast = (val) => {
+    state.boardContrast = val;
+    // Only apply filter if a wallpaper is set
+    if (boardEl.style.backgroundImage) {
+      const cssContrast = (val / 50) * 100; // 0→0%, 50→100%, 100→200%
+      boardEl.style.filter = `contrast(${cssContrast}%)`;
+    }
+  };
+
+  if (contrastSlider && contrastValue) {
     contrastSlider.addEventListener('input', (e) => {
       const val = parseInt(e.target.value, 10);
-      state.boardContrast = val;
-      if (contrastValue) contrastValue.textContent = val;
-      // Only apply filter if a wallpaper is set
-      if (boardEl.style.backgroundImage) {
-        const cssContrast = (val / 50) * 100; // 0→0%, 50→100%, 100→200%
-        boardEl.style.filter = `contrast(${cssContrast}%)`;
-      }
+      contrastValue.value = val;
+      syncContrast(val);
     });
     contrastSlider.addEventListener('change', () => saveSettings());
+
+    contrastValue.addEventListener('input', (e) => {
+      let val = parseInt(e.target.value, 10);
+      if (isNaN(val)) return;
+      
+      // Immediately correct out-of-bounds typing
+      if (val > 100) {
+        val = 100;
+        e.target.value = 100;
+      } else if (val < 0) {
+        val = 0;
+        e.target.value = 0;
+      }
+      
+      contrastSlider.value = val;
+      syncContrast(val);
+    });
+    contrastValue.addEventListener('change', (e) => {
+      let val = parseInt(e.target.value, 10);
+      if (isNaN(val)) val = 50;
+      val = Math.max(0, Math.min(100, val));
+      e.target.value = val;
+      saveSettings();
+    });
   }
 }
 
@@ -108,7 +136,7 @@ function applyWallpaper(boardEl, dataUrl, contrast) {
 
 // ─── Crop Modal ──────────────────────────────────────────────
 
-function openCropModal(imageSrc, boardEl, thumbnail, removeBtn, contrastSlider) {
+function openCropModal(imageSrc, boardEl, thumbnail, removeBtn, contrastSlider, contrastValue) {
   const modal = document.getElementById('crop-modal');
   const cropCanvas = document.getElementById('crop-canvas');
   const applyBtn = document.getElementById('crop-apply-btn');
@@ -127,6 +155,7 @@ function openCropModal(imageSrc, boardEl, thumbnail, removeBtn, contrastSlider) 
     const scale = maxW / img.width;
     const canvasW = Math.floor(img.width * scale);
     const canvasH = Math.floor(img.height * scale);
+
 
     cropCanvas.width = canvasW;
     cropCanvas.height = canvasH;
@@ -148,7 +177,7 @@ function openCropModal(imageSrc, boardEl, thumbnail, removeBtn, contrastSlider) 
 
     let contrast = contrastSlider ? parseInt(contrastSlider.value, 10) : 50;
     if (cropContrastSlider) cropContrastSlider.value = contrast;
-    if (cropContrastValue) cropContrastValue.textContent = contrast;
+    if (cropContrastValue) cropContrastValue.value = contrast;
 
     // Draw function
     function draw() {
@@ -303,14 +332,42 @@ function openCropModal(imageSrc, boardEl, thumbnail, removeBtn, contrastSlider) 
     cropCanvas.addEventListener('mouseup', onMouseUp);
     cropCanvas.addEventListener('mouseleave', onMouseUp);
 
-    // ── Contrast slider in crop modal ──
-    if (cropContrastSlider) {
-      const onContrastInput = (e) => {
-        contrast = parseInt(e.target.value, 10);
-        if (cropContrastValue) cropContrastValue.textContent = contrast;
-        draw();
-      };
-      cropContrastSlider.addEventListener('input', onContrastInput);
+    // ── Contrast Slider & Input in crop modal ──
+    const syncCropContrast = (val) => {
+      contrast = val;
+      draw();
+    };
+
+    if (cropContrastSlider && cropContrastValue) {
+      cropContrastSlider.addEventListener('input', (e) => {
+        const val = parseInt(e.target.value, 10);
+        cropContrastValue.value = val;
+        syncCropContrast(val);
+      });
+      
+      cropContrastValue.addEventListener('input', (e) => {
+        let val = parseInt(e.target.value, 10);
+        if (isNaN(val)) return;
+        
+        // Immediately correct out-of-bounds typing
+        if (val > 100) {
+          val = 100;
+          e.target.value = 100;
+        } else if (val < 0) {
+          val = 0;
+          e.target.value = 0;
+        }
+        
+        cropContrastSlider.value = val;
+        syncCropContrast(val);
+      });
+      
+      cropContrastValue.addEventListener('change', (e) => {
+        let val = parseInt(e.target.value, 10);
+        if (isNaN(val)) val = 50;
+        val = Math.max(0, Math.min(100, val));
+        e.target.value = val;
+      });
     }
 
     // ── Apply ──
@@ -347,6 +404,7 @@ function openCropModal(imageSrc, boardEl, thumbnail, removeBtn, contrastSlider) 
       }
       if (removeBtn) removeBtn.style.display = 'inline-flex';
       if (contrastSlider) contrastSlider.value = contrast;
+      if (contrastValue) contrastValue.value = contrast;
 
       // Save
       saveWallpaper(dataUrl);
