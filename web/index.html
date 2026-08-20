@@ -17,10 +17,46 @@
   </button>
 
   <div class="main-container">
-    <!-- FAR LEFT COLUMN: Customise -->
-    <div class="far-left-column">
-      <aside class="sidebar customise-sidebar" style="margin-top: 0;">
-        <h3 style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 12px;">🎨 Customise</h3>
+    <!-- Sidebar Navigation -->
+    <nav class="sidebar-nav">
+      <button class="sidebar-nav__item" data-panel="customise" type="button">
+        <span class="sidebar-nav__icon">🎨</span>
+        <span class="sidebar-nav__label">Customise</span>
+        <span class="sidebar-nav__chevron">›</span>
+      </button>
+      <button class="sidebar-nav__item" data-panel="modifiers" type="button">
+        <span class="sidebar-nav__icon">⚡</span>
+        <span class="sidebar-nav__label">Modifiers</span>
+        <span class="sidebar-nav__chevron">›</span>
+      </button>
+      <button class="sidebar-nav__item" data-panel="shape" type="button">
+        <span class="sidebar-nav__icon">🔷</span>
+        <span class="sidebar-nav__label">Shape</span>
+        <span class="sidebar-nav__chevron">›</span>
+      </button>
+      <button class="sidebar-nav__item" data-panel="weapon" type="button">
+        <span class="sidebar-nav__icon">⚔️</span>
+        <span class="sidebar-nav__label">Weapon</span>
+        <span class="sidebar-nav__chevron">›</span>
+      </button>
+      <button class="sidebar-nav__item" data-panel="record" type="button">
+        <span class="sidebar-nav__icon">🔴</span>
+        <span class="sidebar-nav__label">Record</span>
+        <span class="sidebar-nav__chevron">›</span>
+      </button>
+      <button class="sidebar-nav__item" data-panel="speed" type="button">
+        <span class="sidebar-nav__icon">🏎️</span>
+        <span class="sidebar-nav__label">Speed</span>
+        <span class="sidebar-nav__chevron">›</span>
+      </button>
+    </nav>
+
+    <!-- Dynamic Detail Panel -->
+    <aside class="sidebar-detail-panel" id="sidebar-detail-panel">
+
+      <!-- Customise -->
+      <div class="detail-section" data-panel="customise">
+        <h3 class="detail-section__title">🎨 Customise</h3>
 
         <div class="customise-row">
           <span class="customise-row__label">Board Wallpaper</span>
@@ -40,14 +76,12 @@
           <input type="range" id="board-contrast" class="customise-range" min="0" max="100" value="50">
           <span class="customise-slider-row__value" id="board-contrast-value">50</span>
         </div>
-      </aside>
-    </div>
+      </div>
 
-    <!-- LEFT COLUMN: Modifiers -->
-    <div class="left-column">
-      <aside class="sidebar modifiers-sidebar">
-        <h3 style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 12px;">⚡ Modifiers</h3>
-        
+      <!-- Modifiers -->
+      <div class="detail-section modifiers-section" data-panel="modifiers">
+        <h3 class="detail-section__title">⚡ Modifiers</h3>
+
         <div class="toggle-with-chevron">
           <label class="toggle-container" title="Enable Power-ups">
             <span class="toggle-label">Power-ups</span>
@@ -105,19 +139,11 @@
         <p class="recording-desc" style="font-size: 0.75rem; color: var(--text-muted); margin-top: 12px; line-height: 1.4;">
           Toggle game modifiers before starting a match. Power-ups spawn randomly on the arena.
         </p>
-      </aside>
-    </div>
+      </div>
 
-    <!-- MIDDLE COLUMN: Shape/Weapon + Record + Speed -->
-    <div class="middle-column">
-      <aside class="sidebar">
-        <div class="sidebar-tabs">
-          <button class="btn-tab btn-tab--active" data-target="tab-shape">SHAPE</button>
-          <button class="btn-tab" data-target="tab-weapon">WEAPON</button>
-        </div>
-
-      <!-- SHAPE TAB -->
-      <div id="tab-shape" class="tab-content active">
+      <!-- Shape -->
+      <div class="detail-section" data-panel="shape">
+        <h3 class="detail-section__title">🔷 Shape</h3>
         <div class="shape-options">
           <button class="btn-shape btn-shape--active" data-shape="rectangle">
             <div class="shape-icon shape-icon--rect"></div>
@@ -130,10 +156,10 @@
         </div>
       </div>
 
-      <!-- WEAPON TAB -->
-      <div id="tab-weapon" class="tab-content">
+      <!-- Weapon -->
+      <div class="detail-section" data-panel="weapon">
+        <h3 class="detail-section__title">⚔️ Weapon</h3>
         <div class="shape-options">
-          
           <!-- Sword -->
           <div class="weapon-row">
             <div class="weapon-main" style="display: flex; gap: 8px;">
@@ -182,13 +208,12 @@
               <label class="setting-row"><span>Bullet Life (s)</span><input type="number" id="gun-bullet-life" class="setting-input" value="2" min="1"></label>
             </div>
           </div>
-
         </div>
       </div>
-      </aside>
 
-      <!-- RECORDING PANEL -->
-      <aside class="sidebar recording-sidebar">
+      <!-- Record -->
+      <div class="detail-section" data-panel="record">
+        <h3 class="detail-section__title">🔴 Record</h3>
         <div class="recording-options">
           <label class="toggle-container" title="Enable Screen Recording">
             <span class="toggle-label">Record Match</span>
@@ -201,18 +226,19 @@
             When enabled, the match will be automatically recorded and saved as a video file when it ends.
           </p>
         </div>
-      </aside>
+      </div>
 
-      <!-- SPEED PANEL -->
-      <aside class="sidebar speed-sidebar">
-        <h3 style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 12px;">🏎️ Speed</h3>
+      <!-- Speed -->
+      <div class="detail-section" data-panel="speed">
+        <h3 class="detail-section__title">🏎️ Speed</h3>
         <div class="speed-controls-panel" id="speed-controls">
           <button class="btn-speed active" data-speed="1">1x</button>
           <button class="btn-speed" data-speed="2">2x</button>
           <button class="btn-speed" data-speed="4">4x</button>
         </div>
-      </aside>
-    </div>
+      </div>
+
+    </aside>
 
     <!-- RIGHT COLUMN: Game Board -->
     <div class="right-column">

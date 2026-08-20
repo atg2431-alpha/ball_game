@@ -22,6 +22,7 @@ import { showBanner } from './ui/event-banner.js';
 import { resetPowerups } from './systems/powerup-registry.js';
 import { initPowerupUI } from './controls/powerup-ui.js';
 import { initCustomiseUI } from './controls/customise-ui.js';
+import { initSidebarNav } from './controls/sidebar-nav.js';
 import { loadSettings, saveSettings } from './systems/storage.js';
 // Import all power-up modules to trigger self-registration
 import './powerups/split.js';
@@ -164,6 +165,9 @@ function init() {
   
   // Initialize Power-up Configuration UI (after power-up modules are loaded)
   initPowerupUI();
+  
+  // Initialize Sidebar Navigation (collapsible panels)
+  initSidebarNav();
   
   // Initialize Customise panel (wallpaper, contrast)
   initCustomiseUI();
