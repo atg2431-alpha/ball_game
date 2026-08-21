@@ -52,6 +52,8 @@ const EVENT_SOUND_MAP = new Map([
 
 let soundEnabled = false;
 let audioContext = null;
+let masterGainNode = null;
+let mediaStreamDestination = null;
 
 /** Cache of decoded AudioBuffers keyed by cue name */
 const audioBuffers = new Map();
@@ -69,6 +71,11 @@ function ensureAudioContext() {
   if (!audioContext) {
     try {
       audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      masterGainNode = audioContext.createGain();
+      masterGainNode.connect(audioContext.destination);
+      
+      mediaStreamDestination = audioContext.createMediaStreamDestination();
+      masterGainNode.connect(mediaStreamDestination);
       console.log('🔊 AudioContext created');
     } catch (e) {
       console.warn('🔇 Web Audio API not available:', e);
@@ -196,7 +203,7 @@ function triggerSound(cueName, eventData) {
 
     // Connect: source → gain → output
     source.connect(gainNode);
-    gainNode.connect(audioContext.destination);
+    gainNode.connect(masterGainNode);
 
     source.start(0);
   } catch (err) {
@@ -226,4 +233,9 @@ export function playUIClick() {
 /** Get the AudioContext */
 export function getAudioContext() {
   return audioContext;
+}
+
+/** Get the MediaStream from MediaStreamDestination */
+export function getAudioStream() {
+  return mediaStreamDestination ? mediaStreamDestination.stream : null;
 }

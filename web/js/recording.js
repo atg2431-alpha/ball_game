@@ -12,6 +12,7 @@
 import { CONFIG } from './config.js';
 import { state } from './state.js';
 import { getFormattedTime } from './ui/match-timer.js';
+import { getAudioStream } from './systems/sound-hooks.js';
 
 let mediaRecorder = null;
 let recordedChunks = [];
@@ -275,6 +276,15 @@ export async function startRecording(wrapperEl) {
 
     // 3. Start MediaRecorder on the recording canvas stream
     stream = recCanvas.captureStream(CONFIG.recording.fps);
+    
+    // Add audio tracks if available
+    const audioStream = getAudioStream();
+    if (audioStream) {
+      audioStream.getAudioTracks().forEach(track => {
+        stream.addTrack(track);
+      });
+    }
+
     mediaRecorder = new MediaRecorder(stream, { 
       mimeType: CONFIG.recording.mimeType,
       videoBitsPerSecond: CONFIG.recording.videoBitsPerSecond
@@ -328,7 +338,11 @@ function finalizeStop() {
     const blob = new Blob(recordedChunks, { type: CONFIG.recording.mimeType });
     
     if (stream) {
-      stream.getTracks().forEach(track => track.stop());
+      stream.getTracks().forEach(track => {
+        if (track.kind === 'video') {
+          track.stop();
+        }
+      });
     }
 
     stream = null;
