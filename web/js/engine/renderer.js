@@ -123,8 +123,9 @@ export function renderFrame() {
   renderFlash(ctx, width, height);
 }
 
-function getBallPalette(ballId) {
-  const colour = state.playerColors?.[ballId] ?? (ballId === 'ball-1' ? 'blue' : 'red');
+export function getBallPalette(ballId) {
+  const baseId = ballId.split('_clone')[0];
+  const colour = state.playerColors?.[baseId] ?? (baseId === 'ball-1' ? 'blue' : 'red');
   switch (colour) {
     case 'green':
       return {

@@ -666,7 +666,7 @@ body::before {
    DETAIL PANEL
    ============================================ */
 .sidebar-detail-panel {
-  width: 250px;
+  width: 320px;
   flex-shrink: 0;
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid var(--border-subtle);
@@ -1934,7 +1934,8 @@ input:checked + .slider:before {
 .customise-slider-row__input {
   font-size: 0.72rem;
   color: var(--text-primary);
-  width: 36px;
+  width: 42px;
+  flex-shrink: 0;
   text-align: right;
   font-variant-numeric: tabular-nums;
   background: rgba(255, 255, 255, 0.05);

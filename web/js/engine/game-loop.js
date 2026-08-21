@@ -106,10 +106,12 @@ export function gameLoop(timestamp) {
   // Check win condition
   let winner = null;
   for (const ball of state.balls) {
-    if (ball.hp <= 0) {
-      winner = state.balls.find(b => b.id !== ball.id);
+    if (ball.hp <= 0 && !ball.isClone) {
+      // Find the other main ball
+      winner = state.balls.find(b => b.id !== ball.id && !b.isClone);
       if (winner) {
         events.emit(EVENTS.BALL_KILLED, { killer: winner, victim: ball });
+        break;
       }
     }
   }

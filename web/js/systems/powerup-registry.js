@@ -118,19 +118,23 @@ export function updatePowerups(balls, timestamp) {
       if (dist < ball.radius + item.radius) {
         const def = registry.get(item.type);
         if (!def) continue;
+        if (ball.isClone) continue; // Clones cannot pick up powerups
         
         // Activate power-up on ball
         if (!ball.activePowerups) ball.activePowerups = [];
         
-        ball.activePowerups.push({
+        const activeInstance = {
           type: item.type,
           startTime: timestamp,
           duration: def.duration,
           def: def,
-        });
+          state: {}
+        };
+        
+        ball.activePowerups.push(activeInstance);
         
         // Call onActivate
-        def.onActivate(ball, state, events);
+        def.onActivate(ball, state, events, activeInstance);
         
         // Emit event
         events.emit(EVENTS.POWERUP_PICKUP, { ball, powerupType: item.type });
@@ -155,12 +159,12 @@ export function updatePowerups(balls, timestamp) {
       
       if (elapsed >= active.duration) {
         // Expire
-        active.def.onExpire(ball, state, events);
+        active.def.onExpire(ball, state, events, active);
         events.emit(EVENTS.POWERUP_EXPIRED, { ball, powerupType: active.type });
         ball.activePowerups.splice(i, 1);
       } else {
         // Tick
-        active.def.onTick(ball, elapsed, state, events);
+        active.def.onTick(ball, elapsed, state, events, active);
       }
     }
   }
@@ -226,7 +230,7 @@ export function renderActivePowerups(ctx, ball, timestamp) {
   
   for (const active of ball.activePowerups) {
     if (active.def.onRender) {
-      active.def.onRender(ctx, ball, timestamp);
+      active.def.onRender(ctx, ball, timestamp, active);
     }
   }
 }
@@ -241,7 +245,7 @@ export function resetPowerups() {
   for (const ball of state.balls) {
     if (ball.activePowerups) {
       for (const active of ball.activePowerups) {
-        active.def.onExpire(ball, state, events);
+        active.def.onExpire(ball, state, events, active);
       }
       ball.activePowerups = [];
     }
