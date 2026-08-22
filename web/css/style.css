@@ -2118,3 +2118,125 @@ input:checked + .slider:before {
   background: rgba(192, 132, 252, 0.35);
   border-color: #c084fc;
 }
+/* ── Extended Color Picker ── */
+.colour-picker-trigger {
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 0 4px;
+  line-height: 1;
+  opacity: 0.6;
+  transition: opacity 0.2s, transform 0.2s;
+  outline: none;
+}
+
+.colour-picker-trigger:hover {
+  opacity: 1;
+  transform: translateX(2px);
+}
+
+body.light-theme .colour-picker-trigger {
+  color: #000;
+}
+
+.extended-color-picker {
+  position: absolute;
+  background: #fdfdfd;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  padding: 12px;
+  width: 280px;
+  z-index: 1000;
+  color: #111;
+  font-family: 'Outfit', 'Inter', sans-serif;
+}
+
+/* Dark mode overrides (assuming a dark mode class exists or default is dark) */
+body .extended-color-picker {
+  background: #1e1e24;
+  color: #ffffff;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.8);
+}
+body.light-theme .extended-color-picker {
+  background: #f8f9fa;
+  color: #1a1a1a;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+/* Make an arrow pointing left if placed to the right */
+.extended-color-picker::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: -6px;
+  transform: translateY(-50%);
+  border-width: 6px 6px 6px 0;
+  border-style: solid;
+  border-color: transparent #1e1e24 transparent transparent;
+}
+body.light-theme .extended-color-picker::before {
+  border-color: transparent #f8f9fa transparent transparent;
+}
+
+.extended-color-picker__header {
+  margin-bottom: 10px;
+}
+
+.extended-color-picker__title {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.extended-color-picker__grid {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  gap: 4px;
+  margin-bottom: 12px;
+}
+
+.extended-color-swatch {
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 4px;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: transform 0.1s, border-color 0.1s;
+}
+
+.extended-color-swatch:hover {
+  transform: scale(1.1);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.extended-color-swatch.active {
+  border-color: #fff;
+  transform: scale(1.15);
+  box-shadow: 0 0 0 1px #333, 0 0 6px rgba(0,0,0,0.5);
+}
+
+.extended-color-picker__select {
+  width: 100%;
+  background: #ffffff;
+  color: #000;
+  border: 1px solid #ddd;
+  padding: 8px 0;
+  border-radius: 6px;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.extended-color-picker__select:hover {
+  background: #f0f0f0;
+}
+
+body:not(.light-theme) .extended-color-picker__select {
+  background: #ffffff;
+  border: none;
+}
+body:not(.light-theme) .extended-color-picker__select:hover {
+  background: #e6e6e6;
+}

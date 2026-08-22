@@ -144,7 +144,29 @@ export function getBallPalette(ballId) {
         aimColor: '#ff4a6a',
       };
     case 'blue':
+      return {
+        shadow: '#93c5fd',
+        gradientLight: '#60a5fa',
+        gradientDark: '#3b82f6',
+        trailRgb: [96, 165, 250],
+        aimColor: '#4a9eff',
+      };
     default:
+      if (colour && colour.startsWith('#')) {
+        const hex = colour.replace('#', '');
+        if (hex.length === 6) {
+          const r = parseInt(hex.substring(0, 2), 16);
+          const g = parseInt(hex.substring(2, 4), 16);
+          const b = parseInt(hex.substring(4, 6), 16);
+          return {
+             shadow: `rgba(${r},${g},${b},0.6)`,
+             gradientLight: `rgb(${Math.min(255, r + 40)},${Math.min(255, g + 40)},${Math.min(255, b + 40)})`,
+             gradientDark: colour,
+             trailRgb: [r, g, b],
+             aimColor: colour
+          };
+        }
+      }
       return {
         shadow: '#93c5fd',
         gradientLight: '#60a5fa',

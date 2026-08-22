@@ -86,4 +86,114 @@ function initColourSelectors() {
       }
     });
   });
+  
+  initExtendedColorPicker();
+}
+
+// ── Extended Color Picker ──────────────────────────────────────
+
+import { EXTENDED_COLORS } from './extended-colors.js';
+
+function initExtendedColorPicker() {
+  const popover = document.getElementById('extended-color-picker');
+  const grid = document.getElementById('extended-color-grid');
+  const selectBtn = document.getElementById('extended-color-select-btn');
+  const triggers = document.querySelectorAll('.colour-picker-trigger');
+  
+  if (!popover || !grid || !selectBtn) return;
+  
+  let activePlayerBtn = null;
+  let selectedExtendedColor = null;
+  let activePlayerNum = null;
+
+  // Build grid
+  EXTENDED_COLORS.forEach(color => {
+    const swatch = document.createElement('div');
+    swatch.className = 'extended-color-swatch';
+    swatch.style.backgroundColor = color;
+    swatch.dataset.colour = color;
+    
+    swatch.addEventListener('click', () => {
+      // Remove active class from all
+      grid.querySelectorAll('.extended-color-swatch').forEach(s => s.classList.remove('active'));
+      swatch.classList.add('active');
+      selectedExtendedColor = color;
+    });
+    
+    grid.appendChild(swatch);
+  });
+  
+  // Handle Trigger clicks
+  triggers.forEach(trigger => {
+    trigger.addEventListener('click', (e) => {
+      e.stopPropagation(); // prevent document click from closing it immediately
+      
+      const playerNum = trigger.dataset.player;
+      activePlayerNum = playerNum;
+      activePlayerBtn = trigger;
+      
+      // Position the popover
+      const rect = trigger.getBoundingClientRect();
+      
+      // Place it to the right of the trigger
+      popover.style.display = 'block';
+      popover.style.top = `${rect.top - popover.offsetHeight / 2 + rect.height / 2 + window.scrollY}px`;
+      popover.style.left = `${rect.right + 10}px`;
+      
+      // Reset selection
+      selectedExtendedColor = null;
+      grid.querySelectorAll('.extended-color-swatch').forEach(s => s.classList.remove('active'));
+    });
+  });
+  
+  // Handle Select Button
+  selectBtn.addEventListener('click', () => {
+    if (selectedExtendedColor && activePlayerNum) {
+      const ballId = activePlayerNum === '1' ? 'ball-1' : 'ball-2';
+      
+      // Update state
+      if (state.playerColors) {
+        state.playerColors[ballId] = selectedExtendedColor;
+      }
+      
+      // Update the main UI for that player
+      const selector = document.getElementById(`player${activePlayerNum}-colour`);
+      if (selector) {
+        // Clear active classes
+        selector.querySelectorAll('.colour-btn').forEach(b => b.classList.remove('active'));
+        
+        // See if there's already a custom button
+        let customBtn = selector.querySelector('.colour-btn--custom');
+        if (!customBtn) {
+          customBtn = document.createElement('button');
+          customBtn.className = 'colour-btn colour-btn--custom';
+          customBtn.dataset.player = activePlayerNum;
+          // Insert before the trigger
+          selector.insertBefore(customBtn, selector.querySelector('.colour-picker-trigger'));
+          
+          // Re-attach standard click handler for the new button
+          customBtn.addEventListener('click', () => {
+             selector.querySelectorAll('.colour-btn').forEach(b => b.classList.remove('active'));
+             customBtn.classList.add('active');
+             if (state.playerColors) state.playerColors[ballId] = customBtn.dataset.colour;
+          });
+        }
+        
+        customBtn.dataset.colour = selectedExtendedColor;
+        customBtn.style.backgroundColor = selectedExtendedColor;
+        customBtn.title = selectedExtendedColor;
+        customBtn.classList.add('active');
+      }
+    }
+    
+    // Close popover
+    popover.style.display = 'none';
+  });
+  
+  // Close popover if clicked outside
+  document.addEventListener('click', (e) => {
+    if (popover.style.display === 'block' && !popover.contains(e.target)) {
+      popover.style.display = 'none';
+    }
+  });
 }
